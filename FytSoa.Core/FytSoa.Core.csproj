@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="FytSoa.Service\Class1.cs" />
+    <Compile Remove="FytSoa.Service\obj\Debug\netcoreapp3.1\FytSoa.Service.AssemblyInfo.cs" />
+    <Compile Remove="FytSoa.Service\obj\Debug\netcoreapp3.1\FytSoa.Service.AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="FytSoa.Service\bin\Debug\netcoreapp3.1\FytSoa.Service.deps.json" />
+    <None Remove="FytSoa.Service\bin\Debug\netcoreapp3.1\FytSoa.Service.dll" />
+    <None Remove="FytSoa.Service\bin\Debug\netcoreapp3.1\FytSoa.Service.pdb" />
+    <None Remove="FytSoa.Service\obj\FytSoa.Service.csproj.nuget.dgspec.json" />
+    <None Remove="FytSoa.Service\obj\FytSoa.Service.csproj.nuget.g.targets" />
+    <None Remove="FytSoa.Service\obj\FytSoa.Service.csproj.nuget.g.props" />
+    <None Remove="FytSoa.Service\obj\project.assets.json" />
+    <None Remove="FytSoa.Service\obj\FytSoa.Service.csproj.nuget.cache" />
+    <None Remove="FytSoa.Service\obj\Debug\netcoreapp3.1\FytSoa.Service.assets.cache" />
+    <None Remove="FytSoa.Service\obj\Debug\netcoreapp3.1\FytSoa.Service.csproj.FileListAbsolute.txt" />
+    <None Remove="FytSoa.Service\obj\Debug\netcoreapp3.1\FytSoa.Service.csprojAssemblyReference.cache" />
+    <None Remove="FytSoa.Service\obj\Debug\netcoreapp3.1\FytSoa.Service.AssemblyInfoInputs.cache" />
+    <None Remove="FytSoa.Service\obj\Debug\netcoreapp3.1\FytSoa.Service.dll" />
+    <None Remove="FytSoa.Service\obj\Debug\netcoreapp3.1\FytSoa.Service.pdb" />
+    <None Remove="FytSoa.Service\obj\Debug\netcoreapp3.1\FytSoa.Service.csprojAssemblyReference.cache" />
+    <None Remove="FytSoa.Service\obj\Debug\netcoreapp3.1\FytSoa.Service.AssemblyInfoInputs.cache" />
+    <None Remove="FytSoa.Service\bin\Debug\netcoreapp3.1\FytSoa.Service.deps.json" />
+    <None Remove="FytSoa.Service\bin\Debug\netcoreapp3.1\FytSoa.Service.dll" />
+    <None Remove="FytSoa.Service\bin\Debug\netcoreapp3.1\FytSoa.Service.pdb" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FytSoa.Common\FytSoa.Common.csproj" />
+  </ItemGroup>
+</Project>

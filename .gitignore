@@ -1,0 +1,17 @@
+.vs
+FytSoa/FytSoa.Api/Properties
+FytSoa/FytSoa.Core/FytSoa.Service/bin
+FytSoa/FytSoa.Core/FytSoa.Service/obj
+FytSoa/FytSoa.Core/.DS_Store
+FytSoa.Api/bin
+FytSoa.Api/obj
+FytSoa.Common/bin
+FytSoa.Common/obj
+FytSoa.Core/bin
+FytSoa.Core/obj
+FytSoa.Extensions/bin
+FytSoa.Extensions/obj
+FytSoa.Service/bin
+FytSoa.Service/obj
+.DS_Store
+FytSoa
