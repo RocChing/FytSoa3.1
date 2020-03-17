@@ -38,30 +38,30 @@ namespace FytSoa.Common
         /// <returns></returns>
         public void Process(string msg, string path="")
         {
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            var config = new NLog.Config.LoggingConfiguration();
-            var logfile = new NLog.Targets.FileTarget() { FileName = "logs/${date:format=yyyyMM}/${shortdate}_log.txt", Encoding = Encoding.GetEncoding("GB2312") };
-            if (!string.IsNullOrEmpty(path))
-            {
-                path += "/";
-                logfile = new NLog.Targets.FileTarget() { FileName = "logs/" + path + "${shortdate}_log.txt", Encoding = Encoding.GetEncoding("GB2312") };
-            }
-            config.LoggingRules.Add(new NLog.Config.LoggingRule("*", LogLevel.Debug, logfile));
-            LogManager.Configuration = config;
-            _logger.Debug(msg);
+            //Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            //var config = new NLog.Config.LoggingConfiguration();
+            //var logfile = new NLog.Targets.FileTarget() { FileName = "logs/${date:format=yyyyMM}/${shortdate}_log.txt", Encoding = Encoding.GetEncoding("GB2312") };
+            //if (!string.IsNullOrEmpty(path))
+            //{
+            //    path += "/";
+            //    logfile = new NLog.Targets.FileTarget() { FileName = "logs/" + path + "${shortdate}_log.txt", Encoding = Encoding.GetEncoding("GB2312") };
+            //}
+            //config.LoggingRules.Add(new NLog.Config.LoggingRule("*", LogLevel.Debug, logfile));
+            //LogManager.Configuration = config;
+            //_logger.Debug(msg);
         }
 
         #region Debug
         public void Debug(string msg, params object[] args)
         {
             _logger.Debug(msg, args);
-            LogManager.Shutdown();
+            //LogManager.Shutdown();
         }
 
         public void Debug(string msg, Exception err)
         {
             _logger.Debug(err, msg);
-            LogManager.Shutdown();
+            //LogManager.Shutdown();
         }
         #endregion
 
@@ -69,13 +69,13 @@ namespace FytSoa.Common
         public void Info(string msg, params object[] args)
         {
             _logger.Info(msg, args);
-            LogManager.Shutdown();
+            //LogManager.Shutdown();
         }
 
         public void Info(string msg, Exception err)
         {
             _logger.Info(err, msg);
-            LogManager.Shutdown();
+            //LogManager.Shutdown();
         }
         #endregion
 
@@ -83,13 +83,13 @@ namespace FytSoa.Common
         public void Warn(string msg, params object[] args)
         {
             _logger.Warn(msg, args);
-            LogManager.Shutdown();
+            //LogManager.Shutdown();
         }
 
         public void Warn(string msg, Exception err)
         {
             _logger.Warn(err, msg);
-            LogManager.Shutdown();
+            //LogManager.Shutdown();
         }
         #endregion
 
@@ -97,13 +97,13 @@ namespace FytSoa.Common
         public void Trace(string msg, params object[] args)
         {
             _logger.Trace(msg, args);
-            LogManager.Shutdown();
+            //LogManager.Shutdown();
         }
 
         public void Trace(string msg, Exception err)
         {
             _logger.Trace(err, msg);
-            LogManager.Shutdown();
+            //LogManager.Shutdown();
         }
         #endregion
 
@@ -111,13 +111,13 @@ namespace FytSoa.Common
         public void Error(string msg, params object[] args)
         {
             _logger.Error(msg, args);
-            LogManager.Shutdown();
+            //LogManager.Shutdown();
         }
 
         public void Error(string msg, Exception err)
         {
             _logger.Error(err, msg);
-            LogManager.Shutdown();
+            //LogManager.Shutdown();
         }
         #endregion
 
@@ -125,13 +125,13 @@ namespace FytSoa.Common
         public void Fatal(string msg, params object[] args)
         {
             _logger.Fatal(msg, args);
-            LogManager.Shutdown();
+            //LogManager.Shutdown();
         }
 
         public void Fatal(string msg, Exception err)
         {
             _logger.Fatal(err, msg);
-            LogManager.Shutdown();
+            //LogManager.Shutdown();
         }
         #endregion
     }

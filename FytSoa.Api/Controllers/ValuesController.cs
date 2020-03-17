@@ -5,26 +5,42 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using FytSoa.Common;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 
 namespace FytSoa.Api.Controllers
 {
     [Route("api/[controller]")]
     public class ValuesController : Controller
     {
+        private Stopwatch Stopwatch { get; set; }
+
+        [HttpGet("testlog")]
+        public string TestLog()
+        {
+            Stopwatch = new Stopwatch();
+            Stopwatch.Start();
+            for (int i = 0; i < 200000; i++)
+            {
+                //Logger.Default.Process("Test"+i,"CMSSS");
+                Logger.Default.Info("Test"+1);
+            }
+            Stopwatch.Stop();
+            return Stopwatch.Elapsed.TotalMilliseconds.ToString();
+        }
 
         // GET: api/values
         [HttpGet]
         public IEnumerable<string> Get()
         {
             //测试单例
-            //Logger.Default.Debug("aaaaaaaaaaaaaa");
+            Logger.Default.Debug("aaaaaaaaaaaaaa");
             //测试自定义地址
-            Logger.Default.Process("测试自定义日志地址","Cms");
+            //Logger.Default.Process("测试自定义日志地址","Cms");
             
             //测试默认地址
-            Logger.Default.Process("默认地址");
+            //Logger.Default.Process("默认地址");
             //测试配置文件更改后文件写入位置
-            Logger.Default.Error("这里面是错误信息：ERROR");
+            //Logger.Default.Error("这里面是错误信息：ERROR");
             return new string[] { "value1", "value2" };
         }
 
