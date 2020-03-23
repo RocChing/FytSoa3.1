@@ -30,6 +30,32 @@ namespace FytSoa.Common
             Default = new Logger(LogManager.GetCurrentClassLogger());
         }
 
+        private static string _path = "";
+
+        /// <summary>
+        /// 自定义输出目录，初始化
+        /// </summary>
+        public void Setting(string path)
+        {
+            if (_path != path)
+            {
+                _path = path;
+                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                var config = new NLog.Config.LoggingConfiguration();
+                var logfile = new NLog.Targets.FileTarget() { FileName = "logs/${date:format=yyyyMM}/${shortdate}_log.txt", Encoding = Encoding.GetEncoding("GB2312") };
+                logfile.KeepFileOpen = true;
+                logfile.OpenFileCacheTimeout = 30;
+                logfile.ConcurrentWrites = false;
+                if (!string.IsNullOrEmpty(path))
+                {
+                    path += "/";
+                    logfile = new NLog.Targets.FileTarget() { FileName = "logs/" + path + "${shortdate}_log.txt", Encoding = Encoding.GetEncoding("GB2312") };
+                }
+                config.LoggingRules.Add(new NLog.Config.LoggingRule("*", LogLevel.Debug, logfile));
+                LogManager.Configuration = config;
+            }
+        }
+
         /// <summary>
         /// 自定义写日志路径
         /// </summary>
@@ -38,17 +64,7 @@ namespace FytSoa.Common
         /// <returns></returns>
         public void Process(string msg, string path="")
         {
-            //Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            //var config = new NLog.Config.LoggingConfiguration();
-            //var logfile = new NLog.Targets.FileTarget() { FileName = "logs/${date:format=yyyyMM}/${shortdate}_log.txt", Encoding = Encoding.GetEncoding("GB2312") };
-            //if (!string.IsNullOrEmpty(path))
-            //{
-            //    path += "/";
-            //    logfile = new NLog.Targets.FileTarget() { FileName = "logs/" + path + "${shortdate}_log.txt", Encoding = Encoding.GetEncoding("GB2312") };
-            //}
-            //config.LoggingRules.Add(new NLog.Config.LoggingRule("*", LogLevel.Debug, logfile));
-            //LogManager.Configuration = config;
-            //_logger.Debug(msg);
+            _logger.Debug(msg);
         }
 
         #region Debug

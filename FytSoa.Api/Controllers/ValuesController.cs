@@ -17,11 +17,11 @@ namespace FytSoa.Api.Controllers
         [HttpGet("testlog")]
         public string TestLog()
         {
+            Logger.Default.Setting("Test");
             Stopwatch = new Stopwatch();
             Stopwatch.Start();
-            for (int i = 0; i < 200000; i++)
+            for (int i = 0; i < 100; i++)
             {
-                //Logger.Default.Process("Test"+i,"CMSSS");
                 Logger.Default.Info("Test"+1);
             }
             Stopwatch.Stop();
@@ -30,18 +30,17 @@ namespace FytSoa.Api.Controllers
 
         // GET: api/values
         [HttpGet]
-        public IEnumerable<string> Get()
+        public string Get()
         {
-            //测试单例
-            Logger.Default.Debug("aaaaaaaaaaaaaa");
-            //测试自定义地址
-            //Logger.Default.Process("测试自定义日志地址","Cms");
-            
-            //测试默认地址
-            //Logger.Default.Process("默认地址");
-            //测试配置文件更改后文件写入位置
-            //Logger.Default.Error("这里面是错误信息：ERROR");
-            return new string[] { "value1", "value2" };
+            //Logger.Default.Setting("");
+            Stopwatch = new Stopwatch();
+            Stopwatch.Start();
+            for (int i = 0; i < 100; i++)
+            {
+                Logger.Default.Info("TestDefault"+i);
+            }
+            Stopwatch.Stop();
+            return Stopwatch.Elapsed.TotalMilliseconds.ToString();
         }
 
         // GET api/values/5

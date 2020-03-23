@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FytSoa.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -17,10 +18,19 @@ namespace FytSoa.Api.Controllers
         };
 
         private readonly ILogger<WeatherForecastController> _logger;
+        private readonly ISysAdminService _adminService;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger
+            , ISysAdminService adminService)
         {
             _logger = logger;
+            _adminService = adminService;
+        }
+
+        [HttpGet("list")]
+        public async Task<IActionResult> List()
+        {
+            return Ok(await _adminService.GetListAsync());
         }
 
         [HttpGet]

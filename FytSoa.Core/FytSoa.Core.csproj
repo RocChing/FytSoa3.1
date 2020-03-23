@@ -10,6 +10,9 @@
     <Compile Remove="FytSoa.Service\obj\Debug\netcoreapp3.1\FytSoa.Service.AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="sqlSugarCore" Version="5.0.0.11" />
+  </ItemGroup>
+  <ItemGroup>
     <None Remove="FytSoa.Service\bin\Debug\netcoreapp3.1\FytSoa.Service.deps.json" />
     <None Remove="FytSoa.Service\bin\Debug\netcoreapp3.1\FytSoa.Service.dll" />
     <None Remove="FytSoa.Service\bin\Debug\netcoreapp3.1\FytSoa.Service.pdb" />

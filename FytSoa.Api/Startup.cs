@@ -2,7 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
+using FytSoa.Common;
+using FytSoa.Service;
+using FytSoa.Service.Repository;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -21,6 +25,7 @@ namespace FytSoa.Api
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            FytSoaConfig.InitConfig(configuration);
         }
 
         public IConfiguration Configuration { get; }
@@ -28,6 +33,8 @@ namespace FytSoa.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.RegisterAssembly("FytSoa.Service");
+            services.AddTransient(typeof(IBaseService<>), typeof(BaseService<>));
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -61,5 +68,6 @@ namespace FytSoa.Api
                 endpoints.MapControllers();
             });
         }
+
     }
 }
