@@ -9,7 +9,7 @@ namespace FytSoa.Common
     /// API 返回JSON字符串
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class ApiResult<T> where T : class
+    public class ApiResult<T>
     {
         /// <summary>
         /// 是否成功
@@ -28,5 +28,20 @@ namespace FytSoa.Common
         /// 数据集
         /// </summary>
         public T data { get; set; }
+
+        public static ApiResult<T> Success(T data, string msg = "")
+        {
+            return new ApiResult<T>() { data = data, message = msg };
+        }
+
+        public static ApiResult<T> Fail(string msg)
+        {
+            return new ApiResult<T>() { message = msg, success = false, statusCode = (int)HttpStatusCode.InternalServerError };
+        }
+    }
+
+    public class ApiResult : ApiResult<object>
+    {
+
     }
 }

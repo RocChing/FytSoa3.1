@@ -18,14 +18,14 @@ namespace FytSoa.Service.Repository
         /// </summary>
         /// <param name="parm">cms_advlist</param>
         /// <returns></returns>
-        Task<ApiResult<string>> AddAsync(T parm,bool Async=true);
+        Task<bool> AddAsync(T parm, bool Async = true);
 
         /// <summary>
         /// 批量添加数据
         /// </summary>
         /// <param name="parm">List<T></param>
         /// <returns></returns>
-        Task<ApiResult<string>> AddListAsync(List<T> parm, bool Async = true);
+        Task<int> AddListAsync(List<T> parm, bool Async = true);
 
         #endregion
 
@@ -37,14 +37,14 @@ namespace FytSoa.Service.Repository
         /// <param name="order">Expression<Func<T, object>></param>
         /// <param name="orderEnum">DbOrderEnum</param>
         /// <returns></returns>
-        Task<ApiResult<List<T>>> GetListAsync(Expression<Func<T, bool>> where,
+        Task<List<T>> GetListAsync(Expression<Func<T, bool>> where,
             Expression<Func<T, object>> order, DbOrderEnum orderEnum, bool Async = true);
 
         /// <summary>
         /// 获得列表
         /// </summary>
         /// <returns></returns>
-        Task<ApiResult<List<T>>> GetListAsync(bool Async = true);
+        Task<List<T>> GetListAsync(bool Async = true);
 
         /// <summary>
 		/// 获得列表——分页
@@ -69,14 +69,14 @@ namespace FytSoa.Service.Repository
         /// </summary>
         /// <param name="parm">string</param>
         /// <returns></returns>
-        Task<ApiResult<T>> GetModelAsync(string parm, bool Async = true);
+        Task<T> GetModelAsync(string parm, bool Async = true);
 
         /// <summary>
         /// 获得一条数据
         /// </summary>
         /// <param name="where">Expression<Func<T, bool>></param>
         /// <returns></returns>
-        Task<ApiResult<T>> GetModelAsync(Expression<Func<T, bool>> where, bool Async = true);
+        Task<T> GetModelAsync(Expression<Func<T, bool>> where, bool Async = true);
         #endregion
 
         #region 修改操作
@@ -85,14 +85,14 @@ namespace FytSoa.Service.Repository
         /// </summary>
         /// <param name="parm">T</param>
         /// <returns></returns>
-        Task<ApiResult<string>> UpdateAsync(T parm, bool Async = true);
+        Task<int> UpdateAsync(T parm, bool Async = true);
 
         /// <summary>
         /// 修改一条数据
         /// </summary>
         /// <param name="parm">T</param>
         /// <returns></returns>
-        Task<ApiResult<string>> UpdateAsync(List<T> parm, bool Async = true);
+        Task<int> UpdateAsync(List<T> parm, bool Async = true);
 
         /// <summary>
         /// 修改一条数据，可用作假删除
@@ -100,7 +100,7 @@ namespace FytSoa.Service.Repository
         /// <param name="columns">修改的列=Expression<Func<T,T>></param>
         /// <param name="where">Expression<Func<T,bool>></param>
         /// <returns></returns>
-        Task<ApiResult<string>> UpdateAsync(Expression<Func<T, T>> columns,
+        Task<int> UpdateAsync(Expression<Func<T, T>> columns,
             Expression<Func<T, bool>> where, bool Async = true);
         #endregion
 

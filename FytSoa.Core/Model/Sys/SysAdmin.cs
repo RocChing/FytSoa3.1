@@ -23,15 +23,18 @@ namespace FytSoa.Core.Model.Sys
         /// 返回角色列表
         /// </summary>
         [SugarColumn(IsIgnore = true)]
-        public List<AdminToRoleList> RoleList {
-            get {
+        public List<AdminToRoleList> RoleList
+        {
+            get
+            {
                 var role = new List<AdminToRoleList>();
                 if (!string.IsNullOrEmpty(RoleGuid))
                 {
-                    role= JsonConvert.DeserializeObject<List<AdminToRoleList>>(RoleGuid);
+                    role = JsonConvert.DeserializeObject<List<AdminToRoleList>>(RoleGuid);
                 }
                 return role;
-            } }
+            }
+        }
 
         /// <summary>
         /// 归属部门

@@ -33,6 +33,7 @@ namespace FytSoa.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //services.AddHttpClient();
             services.RegisterAssembly("FytSoa.Service");
             services.AddTransient(typeof(IBaseService<>), typeof(BaseService<>));
             services.AddControllers();

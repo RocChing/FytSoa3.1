@@ -28,6 +28,7 @@ namespace FytSoa.Core
         /// <param name="sqlType">数据库类型</param>
         private void InitDataBase(string connStr, DbType sqlType)
         {
+            var logger = Logger.Default;
             Db = new SqlSugarClient(new ConnectionConfig()
             {
                 ConnectionString = connStr,
@@ -37,6 +38,14 @@ namespace FytSoa.Core
             Db.Ado.CommandTimeOut = 30000;//设置超时时间
             Db.Aop.OnLogExecuted = (sql, pars) => //SQL执行完事件
             {
+                logger.Debug(sql);
+                if (pars != null && pars.Length > 0)
+                {
+                    foreach (var item in pars)
+                    {
+                        logger.Debug($"{item.ParameterName}={item.Value}");
+                    }
+                }
                 //这里可以查看执行的sql语句跟参数
             };
             Db.Aop.OnLogExecuting = (sql, pars) => //SQL执行前事件
@@ -46,6 +55,7 @@ namespace FytSoa.Core
             Db.Aop.OnError = (exp) =>//执行SQL 错误事件
             {
                 //这里可以查看执行的sql语句跟参数
+                logger.Error(exp.Message, exp);
             };
             Db.Aop.OnExecutingChangeSql = (sql, pars) => //SQL执行前 可以修改SQL
             {

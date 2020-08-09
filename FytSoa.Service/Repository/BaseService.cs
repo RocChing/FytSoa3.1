@@ -26,21 +26,17 @@ namespace FytSoa.Service.Repository
         /// </summary>
         /// <param name="parm">T</param>
         /// <returns></returns>
-        public async Task<ApiResult<string>> AddAsync(T parm, bool Async = true)
+        public async Task<bool> AddAsync(T parm, bool Async = true)
         {
-            var res = new ApiResult<string>() { statusCode = (int)HttpStatusCode.InternalServerError };
             try
             {
-                var dbres = Async? await Db.Insertable<T>(parm).ExecuteCommandAsync(): Db.Insertable<T>(parm).ExecuteCommand();
-                res.data = dbres.ToString();
-                res.statusCode = (int)HttpStatusCode.OK;
+                return Async ? await Db.Insertable<T>(parm).ExecuteCommandIdentityIntoEntityAsync() : Db.Insertable<T>(parm).ExecuteCommandIdentityIntoEntity();
             }
             catch (Exception ex)
             {
-                res.message = ex.Message;
-                //Logger.Default.ProcessError((int)ApiEnum.Error, ex.Message);
+                Logger.Default.Error(ex.Message, ex);
+                return false;
             }
-            return res;
         }
 
         /// <summary>
@@ -48,21 +44,17 @@ namespace FytSoa.Service.Repository
         /// </summary>
         /// <param name="parm">List<T></param>
         /// <returns></returns>
-        public async Task<ApiResult<string>> AddListAsync(List<T> parm, bool Async = true)
+        public async Task<int> AddListAsync(List<T> parm, bool Async = true)
         {
-            var res = new ApiResult<string>() { statusCode = (int)HttpStatusCode.InternalServerError };
             try
             {
-                var dbres = Async ? await Db.Insertable<T>(parm).ExecuteCommandAsync() : Db.Insertable<T>(parm).ExecuteCommand();
-                res.data = dbres.ToString();
-                res.statusCode = (int)HttpStatusCode.OK;
+                return Async ? await Db.Insertable<T>(parm).ExecuteCommandAsync() : Db.Insertable<T>(parm).ExecuteCommand();
             }
             catch (Exception ex)
             {
-                res.message =  ex.Message;
-                //Logger.Default.ProcessError((int)ApiEnum.Error, ex.Message);
+                Logger.Default.Error(ex.Message, ex);
+                return 0;
             }
-            return res;
         }
         #endregion
 
@@ -72,15 +64,10 @@ namespace FytSoa.Service.Repository
         /// </summary>
         /// <param name="where">Expression<Func<T, bool>></param>
         /// <returns></returns>
-        public async Task<ApiResult<T>> GetModelAsync(Expression<Func<T, bool>> where, bool Async = true)
+        public async Task<T> GetModelAsync(Expression<Func<T, bool>> where, bool Async = true)
         {
-            var res = new ApiResult<T>
-            {
-                statusCode = 200,
-                data = Async ? await Db.Queryable<T>().Where(where).FirstAsync()??new T() { }
-                : Db.Queryable<T>().Where(where).First()??new T() { }
-            };
-            return res;
+            return Async ? await Db.Queryable<T>().Where(where).FirstAsync() ?? new T() { }
+            : Db.Queryable<T>().Where(where).First() ?? new T() { };
         }
 
         /// <summary>
@@ -88,15 +75,10 @@ namespace FytSoa.Service.Repository
         /// </summary>
         /// <param name="parm">string</param>
         /// <returns></returns>
-        public async Task<ApiResult<T>> GetModelAsync(string parm, bool Async = true)
+        public async Task<T> GetModelAsync(string parm, bool Async = true)
         {
-            var res = new ApiResult<T>
-            {
-                statusCode = 200,
-                data = Async ? await Db.Queryable<T>().Where(parm).FirstAsync() ?? new T() { }
-                : Db.Queryable<T>().Where(parm).First() ?? new T() { }
-            };
-            return res;
+            return Async ? await Db.Queryable<T>().Where(parm).FirstAsync() ?? new T() { }
+            : Db.Queryable<T>().Where(parm).First() ?? new T() { };
         }
 
         /// <summary>
@@ -109,7 +91,7 @@ namespace FytSoa.Service.Repository
             var res = new ApiResult<Page<T>>();
             try
             {
-                res.data =Async ? await Db.Queryable<T>()
+                res.data = Async ? await Db.Queryable<T>()
                         .ToPageAsync(parm.page, parm.limit) : Db.Queryable<T>()
                         .ToPage(parm.page, parm.limit);
             }
@@ -136,7 +118,7 @@ namespace FytSoa.Service.Repository
             var res = new ApiResult<Page<T>>();
             try
             {
-                var query= Db.Queryable<T>()
+                var query = Db.Queryable<T>()
                         .Where(where)
                         .OrderByIF((int)orderEnum == 1, order, SqlSugar.OrderByType.Asc)
                         .OrderByIF((int)orderEnum == 2, order, SqlSugar.OrderByType.Desc);
@@ -156,45 +138,39 @@ namespace FytSoa.Service.Repository
 		/// </summary>
 		/// <param name="parm">PageParm</param>
 		/// <returns></returns>
-        public async Task<ApiResult<List<T>>> GetListAsync(Expression<Func<T, bool>> where,
+        public async Task<List<T>> GetListAsync(Expression<Func<T, bool>> where,
             Expression<Func<T, object>> order, DbOrderEnum orderEnum, bool Async = true)
         {
-            var res = new ApiResult<List<T>>();
             try
             {
-                var query=Db.Queryable<T>()
+                var query = Db.Queryable<T>()
                         .Where(where)
                         .OrderByIF((int)orderEnum == 1, order, SqlSugar.OrderByType.Asc)
                         .OrderByIF((int)orderEnum == 2, order, SqlSugar.OrderByType.Desc);
-                res.data = Async ? await query.ToListAsync() : query.ToList();
+                return Async ? await query.ToListAsync() : query.ToList();
             }
             catch (Exception ex)
             {
-                res.message = ex.Message;
-                res.statusCode = (int)HttpStatusCode.InternalServerError;
-                //Logger.Default.ProcessError((int)ApiEnum.Error, ex.Message);
+                Logger.Default.Error(ex.Message, ex);
+                return null;
             }
-            return res;
         }
 
         /// <summary>
         /// 获得列表，不需要任何条件
         /// </summary>
         /// <returns></returns>
-        public async Task<ApiResult<List<T>>> GetListAsync(bool Async = true)
+        public async Task<List<T>> GetListAsync(bool Async = true)
         {
-            var res = new ApiResult<List<T>>();
             try
             {
-                res.data = Async ? await Db.Queryable<T>().ToListAsync() : Db.Queryable<T>().ToList();
+                return Async ? await Db.Queryable<T>().ToListAsync() : Db.Queryable<T>().ToList();
             }
             catch (Exception ex)
             {
-                res.message = ex.Message;
-                res.statusCode = (int)HttpStatusCode.InternalServerError;
-                //Logger.Default.ProcessError((int)ApiEnum.Error, ex.Message);
+                Logger.Default.Error(ex.Message, ex);
+                return null;
             }
-            return res;
         }
         #endregion
 
@@ -204,21 +180,17 @@ namespace FytSoa.Service.Repository
         /// </summary>
         /// <param name="parm">T</param>
         /// <returns></returns>
-        public async Task<ApiResult<string>> UpdateAsync(T parm, bool Async = true)
+        public async Task<int> UpdateAsync(T parm, bool Async = true)
         {
-            var res = new ApiResult<string>() { statusCode = (int)HttpStatusCode.InternalServerError };
             try
             {
-                var dbres= Async? await Db.Updateable<T>(parm).ExecuteCommandAsync() : Db.Updateable<T>(parm).ExecuteCommand();
-                res.data= dbres.ToString();
-                res.statusCode = (int)HttpStatusCode.OK;
+                return Async ? await Db.Updateable<T>(parm).ExecuteCommandAsync() : Db.Updateable<T>(parm).ExecuteCommand();
             }
             catch (Exception ex)
             {
-                res.message = ex.Message;
-                //Logger.Default.ProcessError((int)ApiEnum.Error, ex.Message);
+                Logger.Default.Error(ex.Message, ex);
+                return 0;
             }
-            return res;
         }
 
         /// <summary>
@@ -226,21 +198,17 @@ namespace FytSoa.Service.Repository
         /// </summary>
         /// <param name="parm">T</param>
         /// <returns></returns>
-        public async Task<ApiResult<string>> UpdateAsync(List<T> parm, bool Async = true)
+        public async Task<int> UpdateAsync(List<T> parm, bool Async = true)
         {
-            var res = new ApiResult<string>() { statusCode = (int)HttpStatusCode.InternalServerError };
             try
             {
-                var dbres = Async? await Db.Updateable<T>(parm).ExecuteCommandAsync() : Db.Updateable<T>(parm).ExecuteCommand();
-                res.data = dbres.ToString();
-                res.statusCode = (int)HttpStatusCode.OK;
+                return Async ? await Db.Updateable<T>(parm).ExecuteCommandAsync() : Db.Updateable<T>(parm).ExecuteCommand();
             }
             catch (Exception ex)
             {
-                res.message =  ex.Message;
-                //Logger.Default.ProcessError((int)ApiEnum.Error, ex.Message);
+                Logger.Default.Error(ex.Message, ex);
+                return 0;
             }
-            return res;
         }
 
         /// <summary>
@@ -249,23 +217,19 @@ namespace FytSoa.Service.Repository
         /// <param name="columns">修改的列=Expression<Func<T,T>></param>
         /// <param name="where">Expression<Func<T,bool>></param>
         /// <returns></returns>
-        public async Task<ApiResult<string>> UpdateAsync(Expression<Func<T, T>> columns,
+        public async Task<int> UpdateAsync(Expression<Func<T, T>> columns,
             Expression<Func<T, bool>> where, bool Async = true)
         {
-            var res = new ApiResult<string>() { statusCode = (int)HttpStatusCode.InternalServerError };
             try
             {
-                var dbres = Async ? await Db.Updateable<T>().SetColumns(columns).Where(where).ExecuteCommandAsync() 
-                    : Db.Updateable<T>().SetColumns(columns).Where(where).ExecuteCommand();
-                res.data = dbres.ToString();
-                res.statusCode = (int)HttpStatusCode.OK;
+                return Async ? await Db.Updateable<T>().SetColumns(columns).Where(where).ExecuteCommandAsync()
+                     : Db.Updateable<T>().SetColumns(columns).Where(where).ExecuteCommand();
             }
             catch (Exception ex)
             {
-                res.message =  ex.Message;
-                //Logger.Default.ProcessError((int)ApiEnum.Error, ex.Message);
+                Logger.Default.Error(ex.Message, ex);
+                return 0;
             }
-            return res;
         }
         #endregion
 
@@ -279,9 +243,9 @@ namespace FytSoa.Service.Repository
         {
             var res = new ApiResult<string>() { statusCode = (int)HttpStatusCode.InternalServerError };
             try
-            {  
+            {
                 var list = Utils.StrToListString(parm);
-                var dbres = Async?await Db.Deleteable<T>().In(list.ToArray()).ExecuteCommandAsync(): Db.Deleteable<T>().In(list.ToArray()).ExecuteCommand();
+                var dbres = Async ? await Db.Deleteable<T>().In(list.ToArray()).ExecuteCommandAsync() : Db.Deleteable<T>().In(list.ToArray()).ExecuteCommand();
                 res.data = dbres.ToString();
                 res.statusCode = (int)HttpStatusCode.OK;
             }
@@ -303,7 +267,7 @@ namespace FytSoa.Service.Repository
             var res = new ApiResult<string>() { statusCode = (int)HttpStatusCode.InternalServerError };
             try
             {
-                var dbres = Async? await Db.Deleteable<T>().Where(where).ExecuteCommandAsync() : Db.Deleteable<T>().Where(where).ExecuteCommand();
+                var dbres = Async ? await Db.Deleteable<T>().Where(where).ExecuteCommandAsync() : Db.Deleteable<T>().Where(where).ExecuteCommand();
                 res.data = dbres.ToString();
                 res.statusCode = (int)HttpStatusCode.OK;
             }
