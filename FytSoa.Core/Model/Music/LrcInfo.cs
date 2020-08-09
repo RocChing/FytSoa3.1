@@ -36,7 +36,7 @@ namespace FytSoa.Core.Model.Music
         /// <summary>
         /// 歌词
         /// </summary>
-        public Dictionary<double, string> Words { get; set; }
+        public List<LrcItemInfo> Words { get; set; }
 
         public static LrcInfo Parse(string content)
         {
@@ -48,7 +48,7 @@ namespace FytSoa.Core.Model.Music
             try
             {
                 LrcInfo lrc = new LrcInfo();
-                Dictionary<double, string> dicword = new Dictionary<double, string>();
+                List<LrcItemInfo> items = new List<LrcItemInfo>();
                 string[] lines = content.Split(new char[] { '\r', '\n' });
                 foreach (var line in lines)
                 {
@@ -91,7 +91,7 @@ namespace FytSoa.Core.Model.Music
                             foreach (Match item in mct)
                             {
                                 double time = TimeSpan.Parse("00:" + item.Groups[1].Value).TotalSeconds;
-                                dicword.Add(time, word);
+                                items.Add(new LrcItemInfo(time, word));
                             }
                         }
                         catch
@@ -100,7 +100,7 @@ namespace FytSoa.Core.Model.Music
                         }
                     }
                 }
-                lrc.Words = dicword.OrderBy(t => t.Key).ToDictionary(t => t.Key, p => p.Value);
+                lrc.Words = items.OrderBy(m => m.Time).ToList();
                 return lrc;
             }
             catch (Exception e)

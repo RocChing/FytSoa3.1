@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using System.Net;
 using Newtonsoft.Json.Linq;
 using FytSoa.Core;
+using SqlSugar;
+using FytSoa.Core.ViewModel.Music;
 
 namespace FytSoa.Service.Implements.Music
 {
@@ -23,6 +25,41 @@ namespace FytSoa.Service.Implements.Music
         {
             this.listService = listService;
             this.musicListService = musicListService;
+        }
+
+        public async Task<List<MusicListViewModel>> GetMusics()
+        {
+            List<MusicListViewModel> viewModel2s = new List<MusicListViewModel>();
+            var list = await listService.GetListAsync(it => true, it => it.Id, DbOrderEnum.Desc);
+
+            var list2 = await Db.Queryable<MusicListInfo>().Mapper(it => it.Music, it => it.MusicId).ToListAsync();
+            if (list != null && list.Count > 0)
+            {
+                foreach (var item in list)
+                {
+                    MusicListViewModel mm = new MusicListViewModel();
+                    mm.ListName = item.Name;
+                    mm.Number = item.Number;
+                    mm.MusicList = new List<IMusic>();
+
+                    if (list2 != null && list2.Count > 0)
+                    {
+                        var list3 = list2.FindAll(m => m.ListId == item.Id);
+                        if (list3 != null && list3.Count > 0)
+                        {
+                            foreach (var music in list3)
+                            {
+                                if (music.Music != null)
+                                {
+                                    mm.MusicList.Add(music.Music.ToMusic());
+                                }
+                            }
+                        }
+                    }
+                    viewModel2s.Add(mm);
+                }
+            }
+            return viewModel2s;
         }
 
         public List<IMusic> GetMusics(string kw, int top = 10)

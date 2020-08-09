@@ -12,6 +12,12 @@ namespace FytSoa.Core.Model.Music
         public int ListId { get; set; }
         public string MusicId { get; set; }
 
+        [SqlSugar.SugarColumn(IsIgnore = true)]
+        public ListInfo List { get; set; }
+
+        [SqlSugar.SugarColumn(IsIgnore = true)]
+        public MusicInfo Music { get; set; }
+
         public MusicListInfo()
         { }
 

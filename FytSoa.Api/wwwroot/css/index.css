@@ -1,0 +1,62 @@
+﻿body {
+    padding: 20px;
+    background-color: #2e86ef;
+    font: 14px / 1.5 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'WenQuanYi Micro Hei', 'Microsoft Yahei', Arial, sans-serif;
+}
+
+h1 {
+    font-size: 36px;
+    color: #fff;
+    text-align: center;
+}
+
+.homepage {
+    color: #fff;
+    text-align: center;
+    font-size: 18px;
+}
+
+    .homepage a {
+        color: #fff;
+    }
+
+.wrapper {
+    width: 640px;
+    margin: 60px auto;
+}
+
+#smusic {
+    margin-bottom: 30px;
+}
+
+.button-group {
+    text-align: center;
+}
+
+    .button-group button {
+        display: inline-block;
+        height: 36px;
+        line-height: 20px;
+        padding: 8px 16px;
+        min-width: 100px;
+        text-align: center;
+        border: 1px solid #ccc;
+        cursor: pointer;
+        font: inherit;
+    }
+
+        .button-group button:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+        }
+
+.gitbtns {
+    margin: 20px;
+    text-align: center;
+}
+
+    .gitbtns iframe {
+        display: inline;
+        width: auto;
+        max-width: 120px;
+    }

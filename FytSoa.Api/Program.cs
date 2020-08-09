@@ -26,6 +26,7 @@ namespace FytSoa.Api
                 .ConfigureLogging(logging =>
                 {
                     logging.ClearProviders();
+                    logging.AddConsole();
                     logging.SetMinimumLevel(LogLevel.Trace);
                 })
                 .UseNLog();

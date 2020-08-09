@@ -1,0 +1,65 @@
+﻿@page
+
+<div>
+    <article class="wrapper">
+        <div id="smusic"></div>
+        <div class="button-group">
+            <button id="getCurrentMusic">获取当前播放歌曲</button>
+            <button id="addMusicToList">向列表中添加音乐</button>
+        </div>
+    </article>
+</div>
+
+<script type="text/javascript">
+    var songList = [
+        {
+            title: '恋曲1980',
+            singer: '罗大佑',
+            audio: 'http://fs.pc.kugou.com/202008100139/8a3069f342ffaed31fa6245bd4067f6f/G198/M09/05/1D/ZocBAF5Wh9mAfYitADEHQ8xJofM946.mp3',
+            thumbnail: 'http://imge.kugou.com/stdmusic/20160909/20160909041538511009.jpg',
+            lyric: './data/chengdu.lrc'
+        }
+    ];
+
+    var $ = function (id) {
+        return document.getElementById(id);
+    }
+
+    var smusic = SMusic(songList, {
+        container: $('smusic'),
+        panel: 'list',
+        volume: 0.5
+    });
+    smusic.init();
+
+    var newSong = {
+        title: '向天再借五百年',
+        singer: '韩磊',
+        audio: 'http://m2.music.126.net/9Xuqj6SBQr9d_i-wyy_FBA==/3118214976442555.mp3',
+        thumbnail: 'http://p1.music.126.net/MsjB1mwEjSzidqcesbwz3w==/591537255755598.jpg',
+        lyric: null
+    };
+
+    $('getCurrentMusic').addEventListener('click', function () {
+        var data = smusic.getCurrentInfo();
+        var info = '';
+        if (data) {
+            for (var k in data) {
+                if (['audio', 'lyric', 'thumbnail'].indexOf(k) === -1) {
+                    info += (k + '：' + data[k] + '\n');
+                }
+            }
+            console.info(info);
+        }
+    });
+
+    $('addMusicToList').addEventListener('click', function () {
+        console.log("追加前：" + smusic.playList.length + "首");
+        smusic.addSong(newSong, function () {
+            newSong = null; //防止重复追加
+        });
+        this.setAttribute('disabled', 'disabled');
+        console.log("追加后：" + smusic.playList.length + "首")
+    });
+
+</script>

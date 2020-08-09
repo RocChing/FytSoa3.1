@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using FytSoa.Core.Model.Music;
 using FytSoa.Service.Interfaces.Music;
 using FytSoa.Common;
+using FytSoa.Core.ViewModel.Music;
 
 namespace FytSoa.Api.Controllers
 {
@@ -17,6 +18,13 @@ namespace FytSoa.Api.Controllers
         public MusicController(IMusicService musicService)
         {
             this.musicService = musicService;
+        }
+
+        [HttpGet("getMusics")]
+        public async Task<ApiResult<List<MusicListViewModel>>> GetMusics()
+        {
+            var list = await musicService.GetMusics();
+            return ApiResult<List<MusicListViewModel>>.Success(list);
         }
 
         [HttpGet("search")]

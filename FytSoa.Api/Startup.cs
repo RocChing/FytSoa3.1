@@ -36,6 +36,7 @@ namespace FytSoa.Api
             //services.AddHttpClient();
             services.RegisterAssembly("FytSoa.Service");
             services.AddTransient(typeof(IBaseService<>), typeof(BaseService<>));
+            services.AddRazorPages();
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -55,6 +56,7 @@ namespace FytSoa.Api
             }
             //加载配置文件
             NLog.LogManager.LoadConfiguration("nlog.config").GetCurrentClassLogger();
+            app.UseStaticFiles();
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>
@@ -67,8 +69,8 @@ namespace FytSoa.Api
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapRazorPages();
             });
         }
-
     }
 }
