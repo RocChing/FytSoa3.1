@@ -4,6 +4,11 @@
     font: 14px / 1.5 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'WenQuanYi Micro Hei', 'Microsoft Yahei', Arial, sans-serif;
 }
 
+.tip {
+    text-align: center;
+    font-size: 50px;
+}
+
 h1 {
     font-size: 36px;
     color: #fff;

@@ -32,14 +32,15 @@
     display: none !important; }
 
 [class^='smusic-ico-'], [class*=' smusic-ico-'], .smusic-ctrl--play, .smusic-volume--toggle, .smusic-ctrl--mode {
-  font-family: 'SMusic' !important;
-  font-weight: normal;
-  font-style: normal;
-  font-variant: normal;
-  line-height: 1;
-  speak: none;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale; }
+    font-family: 'SMusic' !important;
+    font-weight: normal;
+    font-style: normal;
+    font-variant: normal;
+    line-height: 1;
+    speak: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
 
 .smusic-ico-lyric:before {
   content: '\e90c'; }
@@ -207,9 +208,11 @@
       -ms-flex-flow: row nowrap;
           flex-flow: row nowrap; }
   .smusic-container > .smusic-main > .smusic-panel {
-    width: 45%;
+    width: 30%;
     position: relative;
-    text-align: center; }
+    text-align: center;
+    overflow-y:hidden;
+  }
     .smusic-container > .smusic-main > .smusic-panel:last-of-type {
       overflow: hidden;
       margin-left: 20px;
@@ -236,13 +239,13 @@
               transform: translate3d(0, 0, 0);
       text-align: center; }
     .smusic-container > .smusic-main .smusic-music-info .smusic-music--title {
-      font-size: 18px; }
+      font-size: 30px; }
     .smusic-container > .smusic-main .smusic-music-info .smusic-music--singer {
-      font-size: 14px;
+      font-size: 30px;
       margin-left: 5px; }
   .smusic-container > .smusic-main .smusic-music-thumbnail {
-    width: 170px;
-    height: 170px;
+    /*width: 170px;
+    height: 170px;*/
     margin: 15px auto;
     background: url(https://s-mohan.github.io/demo/static/img/smusic.jpg) center no-repeat;
     background-size: cover; }
@@ -282,7 +285,7 @@
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  width: 200%;
+  width: 100%;
   height: 100%;
   -webkit-transition: -webkit-transform .2s;
   transition: -webkit-transform .2s;
@@ -297,19 +300,20 @@
   .smusic-container .smusic-panel--scroll .smusic-list--wrap, .smusic-container .smusic-panel--scroll .smusic-lyric--wrap {
     position: relative;
     overflow: hidden;
-    width: 50%;
+    width: 100%;
     height: 100%;
-    -ms-flex-preferred-size: 50%;
-        flex-basis: 50%; }
+    /*-ms-flex-preferred-size: 50%;
+        flex-basis: 50%;*/
+  }
   .smusic-container .smusic-panel--scroll.show-list {
     -webkit-transform: translate3d(-100%, 0, 0);
             transform: translate3d(-100%, 0, 0); }
     .smusic-container .smusic-panel--scroll.show-list .smusic-lyric--wrap {
       opacity: 0; }
 
-.smusic-container .smusic-list--wrap {
+/*.smusic-container .smusic-list--wrap {
   -webkit-transform: translate3d(100%, 0, 0);
-          transform: translate3d(100%, 0, 0); }
+          transform: translate3d(100%, 0, 0); }*/
 
 .smusic-container .smusic-lyric--wrap:before, .smusic-container .smusic-lyric--wrap:after {
   position: absolute;
@@ -337,7 +341,7 @@
   .smusic-container .smusic-lyric--wrap li.active {
     /* font-weight: bold;*/
     font-size: 15px;
-    color: #e03a3a; }
+    color: green; }
   .smusic-container .smusic-lyric--wrap li a {
     text-decoration: underline;
     color: #777; }
@@ -362,15 +366,23 @@
   -webkit-transform: translate3d(0, 0, 0);
           transform: translate3d(0, 0, 0); }
   .smusic-container .smusic-lyric--wrap > .smusic-lyric--scroll > li, .smusic-container .smusic-list--wrap > .smusic-list--scroll > li {
-    line-height: 30px;
+    line-height: 50px;
     display: block;
     overflow: hidden;
-    height: 30px;
+    height: 50px;
     white-space: nowrap;
-    text-overflow: ellipsis; }
+    text-overflow: ellipsis; 
+    font-family: KaiTi;
+    font-size:48px;
+  }
 
-.smusic-container .smusic-panel--scroll .smusic-list--wrap {
-  overflow-y: auto; }
+  .smusic-container .smusic-list--wrap > .smusic-list--scroll > li  {
+        font-size: 35px;
+    }
+
+    .smusic-container .smusic-panel--scroll .smusic-list--wrap {
+        overflow-y: auto;
+    }
   .smusic-container .smusic-panel--scroll .smusic-list--wrap > .smusic-list--scroll > li {
     position: relative;
     display: -webkit-box;
@@ -433,7 +445,7 @@
       margin-left: 5%;
       text-align: right; }
     .smusic-container .smusic-panel--scroll .smusic-list--wrap > .smusic-list--scroll > li.active {
-      color: #e03a3a; }
+      color: green; }
       .smusic-container .smusic-panel--scroll .smusic-list--wrap > .smusic-list--scroll > li.active > .song-animate {
         visibility: visible; }
     .smusic-container .smusic-panel--scroll .smusic-list--wrap > .smusic-list--scroll > li.pause > .song-animate i:after {
