@@ -1,12 +1,17 @@
 ﻿@page
 
+@section head{
+    <link href="~/css/smusic.css" rel="stylesheet" />
+    <script src="~/js/mo.js"></script>
+    <script src="~/js/smusic.js"></script>
+}
 <div>
     <article class="wrapper">
         <div id="smusic"></div>
-        <div class="button-group">
+        @*<div class="button-group">
             <button id="getCurrentMusic">获取当前播放歌曲</button>
             <button id="addMusicToList">向列表中添加音乐</button>
-        </div>
+        </div>*@
     </article>
 </div>
 
@@ -17,7 +22,196 @@
             singer: '罗大佑',
             audio: 'http://fs.pc.kugou.com/202008100139/8a3069f342ffaed31fa6245bd4067f6f/G198/M09/05/1D/ZocBAF5Wh9mAfYitADEHQ8xJofM946.mp3',
             thumbnail: 'http://imge.kugou.com/stdmusic/20160909/20160909041538511009.jpg',
-            lyric: './data/chengdu.lrc'
+            words: [
+                {
+                    "time": 0.66,
+                    "text": "罗大佑 - 恋曲1980"
+                },
+                {
+                    "time": 1.87,
+                    "text": "作词：罗大佑"
+                },
+                {
+                    "time": 2.89,
+                    "text": "作曲：罗大佑"
+                },
+                {
+                    "time": 3.9,
+                    "text": "编曲：罗大佑、张定元"
+                },
+                {
+                    "time": 17.69,
+                    "text": "你曾经对我说你永远爱着我"
+                },
+                {
+                    "time": 24.11,
+                    "text": "爱情这东西我明白"
+                },
+                {
+                    "time": 27.39,
+                    "text": "但永远是什么"
+                },
+                {
+                    "time": 30.96,
+                    "text": "姑娘你别哭泣我俩还在一起"
+                },
+                {
+                    "time": 37.61,
+                    "text": "今天的欢乐将是明天"
+                },
+                {
+                    "time": 40.96,
+                    "text": "永恒的回忆"
+                },
+                {
+                    "time": 44.35,
+                    "text": "啦啦啦啦啦啦"
+                },
+                {
+                    "time": 47.69,
+                    "text": "啦啦啦啦啦啦"
+                },
+                {
+                    "time": 51.16,
+                    "text": "今天的欢乐将是明天"
+                },
+                {
+                    "time": 54.4,
+                    "text": "永恒的回忆"
+                },
+                {
+                    "time": 61.25,
+                    "text": "什么都可以抛弃"
+                },
+                {
+                    "time": 64.39,
+                    "text": "什么也不能忘记"
+                },
+                {
+                    "time": 67.92,
+                    "text": "现在你说的话"
+                },
+                {
+                    "time": 69.79,
+                    "text": "都只是你的勇气"
+                },
+                {
+                    "time": 74.65,
+                    "text": "春天刮着风秋天下着雨"
+                },
+                {
+                    "time": 81.32,
+                    "text": "春风秋雨多少海誓山盟"
+                },
+                {
+                    "time": 85.37,
+                    "text": "随风远去"
+                },
+                {
+                    "time": 88.01,
+                    "text": "啦啦啦啦啦啦"
+                },
+                {
+                    "time": 91.34,
+                    "text": "啦啦啦啦啦啦"
+                },
+                {
+                    "time": 94.63,
+                    "text": "亲爱的莫再说你我"
+                },
+                {
+                    "time": 97.62,
+                    "text": "永远不分离"
+                },
+                {
+                    "time": 114.96,
+                    "text": "你不属于我我也不拥有你"
+                },
+                {
+                    "time": 121.47,
+                    "text": "姑娘世上没有人有"
+                },
+                {
+                    "time": 124.97,
+                    "text": "占有的权利"
+                },
+                {
+                    "time": 128.18,
+                    "text": "或许我们分手就这么不回头"
+                },
+                {
+                    "time": 135.05,
+                    "text": "至少不用编织一些"
+                },
+                {
+                    "time": 138.28,
+                    "text": "美丽的借口"
+                },
+                {
+                    "time": 141.48,
+                    "text": "啦啦啦啦啦啦"
+                },
+                {
+                    "time": 144.97,
+                    "text": "啦啦啦啦啦啦"
+                },
+                {
+                    "time": 148.26,
+                    "text": "亲爱的莫再说你我"
+                },
+                {
+                    "time": 151.32,
+                    "text": "永远不分离"
+                },
+                {
+                    "time": 154.96,
+                    "text": "啦啦啦啦啦啦"
+                },
+                {
+                    "time": 158.46,
+                    "text": "啦啦啦啦啦啦"
+                },
+                {
+                    "time": 161.69,
+                    "text": "亲爱的莫再说你我"
+                },
+                {
+                    "time": 164.68,
+                    "text": "永远不分离"
+                },
+                {
+                    "time": 168.37,
+                    "text": "啦啦啦啦啦啦"
+                },
+                {
+                    "time": 171.82,
+                    "text": "啦啦啦啦啦啦"
+                },
+                {
+                    "time": 175.26,
+                    "text": "亲爱的莫再说你我"
+                },
+                {
+                    "time": 178.15,
+                    "text": "明天要分离"
+                },
+                {
+                    "time": 181.85,
+                    "text": "啦啦啦啦啦啦"
+                },
+                {
+                    "time": 185.13,
+                    "text": "啦啦啦啦啦啦"
+                },
+                {
+                    "time": 188.68,
+                    "text": "亲爱的莫再说你我"
+                },
+                {
+                    "time": 191.41,
+                    "text": "永远不分离"
+                }
+            ]
         }
     ];
 

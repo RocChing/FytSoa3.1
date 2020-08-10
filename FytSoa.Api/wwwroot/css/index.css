@@ -21,8 +21,8 @@ h1 {
     }
 
 .wrapper {
-    width: 640px;
-    margin: 60px auto;
+    width: 100%;
+    margin: 0px auto;
 }
 
 #smusic {
