@@ -28,9 +28,9 @@ $(function () {
             if (list && list.length > 0) {
                 for (var i = 0; i < list.length; i++) {
                     var m = convertMusicObj(list[i]);
-                    console.log(m);
                     music.addSong(m);
                 }
+                console.log("playIndex:" + music.playIndex);
                 updateUI(null, music.playList.length);
             }
         });

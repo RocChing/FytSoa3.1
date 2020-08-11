@@ -72,29 +72,34 @@ namespace FytSoa.Service.Implements.Music
             List<IMusic> list = new List<IMusic>();
             try
             {
-                string url = AppConstant.BLOG_API_URL;
-                byte[] commit = Encoding.UTF8.GetBytes($"types=search&count={top}&source=kugou&pages=1&name={kw}");
-                byte[] data = HttpWebClient.Post(url, commit);
-                string json = Encoding.UTF8.GetString(data);
-                var kgList = JsonConvert.DeserializeObject<KugouMusicInfo[]>(json);
-                if (kgList != null && kgList.Length > 0)
-                {
-                    foreach (var item in kgList)
-                    {
-                        list.Add(item.ToKugouMusic());
-                    }
-                }
+                //string url = AppConstant.BLOG_API_URL;
+                //byte[] commit = Encoding.UTF8.GetBytes($"types=search&count={top}&source=kugou&pages=1&name={kw}");
+                //byte[] data = HttpWebClient.Post(url, commit);
+                //string json = Encoding.UTF8.GetString(data);
+                //var kgList = JsonConvert.DeserializeObject<KugouMusicInfo[]>(json);
+                //if (kgList != null && kgList.Length > 0)
+                //{
+                //    foreach (var item in kgList)
+                //    {
+                //        list.Add(item.ToKugouMusic());
+                //    }
+                //}
 
-                byte[] commit2 = Encoding.UTF8.GetBytes($"types=search&count={top}&source=netease&pages=1&name={kw}");
-                byte[] data2 = HttpWebClient.Post(url, commit);
-                string json2 = Encoding.UTF8.GetString(data);
+                string url = $"{AppConstant.NET_API_URL}/search?&limit={top}&keywords={kw}";
+
+                byte[] data2 = HttpWebClient.Get(url);
+                string json2 = Encoding.UTF8.GetString(data2);
                 Logger.Default.Debug(json2);
-                var netList = JsonConvert.DeserializeObject<NeteaseMusicInfo[]>(json);
-                if (netList != null && netList.Length > 0)
+                var res = JsonConvert.DeserializeObject<NetApiMusicResult>(json2);
+                if (res != null && res.Success)
                 {
-                    foreach (var item in netList)
+                    var ress = res.Result;
+                    if (ress != null && ress.HasData)
                     {
-                        list.Add(item.ToNeteaseMusic());
+                        foreach (var item in ress.Songs)
+                        {
+                            list.Add(item.ToMusic());
+                        }
                     }
                 }
                 return list;
@@ -219,9 +224,9 @@ namespace FytSoa.Service.Implements.Music
                 var origin = music.Origin;
                 if (origin == MusicOrigin.Netease)
                 {
-                    string pic_id = music.Id;
+                    string pic_id = ((NeteaseMusic)music).PicId;
                     string pwd = Utils.EncryptNeteaseId(pic_id);
-                    return $"https://p3.music.126.net/{pwd}/{pic_id}.jpg?param=300y300";
+                    return $"https://p1.music.126.net/{pwd}/{pic_id}.jpg";//?param=300y300
                 }
                 string url = $"{AppConstant.KUGOU_API_URL}?r=play/getdata&hash={music.Id}";
                 CookieCollection cookies = new CookieCollection();
@@ -242,13 +247,32 @@ namespace FytSoa.Service.Implements.Music
         {
             try
             {
-                string type = GetOriginName(music.Origin);
-                string url = AppConstant.BLOG_API_URL;
-                byte[] commit = Encoding.UTF8.GetBytes($"types=lyric&id={music.Id}&source={type}");
-                byte[] data = HttpWebClient.Post(url, commit);
-                JObject json = JObject.Parse(Encoding.UTF8.GetString(data));
-                string content = json["lyric"].ToString();
-                return LrcInfo.Parse(content);
+                var origin = music.Origin;
+                if (origin == MusicOrigin.Netease)
+                {
+                    string url = $"{AppConstant.NET_API_URL}/lyric?id={music.Id}";
+                    byte[] data = HttpWebClient.Get(url);
+                    string json = Encoding.UTF8.GetString(data);
+                    var res = JsonConvert.DeserializeObject<NetApiLyricResult>(json);
+                    if (res != null && res.Success)
+                    {
+                        if (res.Lrc != null)
+                        {
+                            return LrcInfo.Parse(res.Lrc.Lyric);
+                        }
+                    }
+                    return null;
+                }
+                else
+                {
+                    string type = GetOriginName(music.Origin);
+                    string url = AppConstant.BLOG_API_URL;
+                    byte[] commit = Encoding.UTF8.GetBytes($"types=lyric&id={music.Id}&source={type}");
+                    byte[] data = HttpWebClient.Post(url, commit);
+                    JObject json = JObject.Parse(Encoding.UTF8.GetString(data));
+                    string content = json["lyric"].ToString();
+                    return LrcInfo.Parse(content);
+                }
             }
             catch (Exception e)
             {
@@ -261,14 +285,32 @@ namespace FytSoa.Service.Implements.Music
         {
             try
             {
-                string type = GetOriginName(music.Origin);
-                string url = AppConstant.BLOG_API_URL;
-                byte[] commit = Encoding.UTF8.GetBytes($"types=url&id={music.Id}&source={type}");
-                byte[] data = HttpWebClient.Post(url, commit);
-                string json = Encoding.UTF8.GetString(data);
-                Logger.Default.Info($"the url json value is:{json}");
-                JObject obj = JObject.Parse(json);
-                return obj["url"].ToString();
+                var origin = music.Origin;
+                if (origin == MusicOrigin.Netease)
+                {
+                    return string.Format(AppConstant.NET_API_MUSIC_URL, music.Id);
+                    string url = $"{AppConstant.NET_API_URL}/song/url?id={music.Id}";
+                    byte[] data = HttpWebClient.Get(url);
+                    string json = Encoding.UTF8.GetString(data);
+                    Logger.Default.Info($"the url json value is:{json}");
+                    var res = JsonConvert.DeserializeObject<NetApiMusicUrlResult>(json);
+                    if (res != null && res.Success)
+                    {
+                        return res.GetFirstUrl();
+                    }
+                    return "";
+                }
+                else
+                {
+                    string type = GetOriginName(music.Origin);
+                    string url = AppConstant.BLOG_API_URL;
+                    byte[] commit = Encoding.UTF8.GetBytes($"types=url&id={music.Id}&source={type}");
+                    byte[] data = HttpWebClient.Post(url, commit);
+                    string json = Encoding.UTF8.GetString(data);
+                    Logger.Default.Info($"the url json value is:{json}");
+                    JObject obj = JObject.Parse(json);
+                    return obj["url"].ToString();
+                }
             }
             catch (Exception e)
             {

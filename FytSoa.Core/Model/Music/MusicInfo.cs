@@ -35,15 +35,10 @@ namespace FytSoa.Core.Model.Music
                 switch (Origin)
                 {
                     case MusicOrigin.Netease:
+                        music = JsonConvert.DeserializeObject<NeteaseMusic>(json);
                         break;
                     case MusicOrigin.Kugou:
                         music = JsonConvert.DeserializeObject<KugouMusic>(json);
-                        break;
-                    case MusicOrigin.Tencent:
-                        break;
-                    case MusicOrigin.Local:
-                        break;
-                    default:
                         break;
                 }
             }

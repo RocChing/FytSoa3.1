@@ -18,11 +18,20 @@ namespace FytSoa.Api.Controllers
     {
         private IHubContext<SongHub> hub;
         private IMusicService musicService;
-       
+
         public MusicController(IMusicService musicService, IHubContext<SongHub> hub)
         {
             this.musicService = musicService;
             this.hub = hub;
+        }
+
+        [HttpGet("getPicStr")]
+        public string test()
+        {
+            string picId = "6630055115561496";
+            //u7KrT_jRkmxUFPApQi_L2w==
+            //u7KrT_jRkmxUFPApQi_L2w==
+            return Utils.EncryptNeteaseId(picId);
         }
 
         [HttpGet("getMusics")]

@@ -310,7 +310,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 title: $('.js-smusic-scroll--title', smusic),
                 panel: $('.js-smusic-scroll--panel', smusic),
                 lyric: $('.js-smusic-scroll--lyric', this.panel),
-                list: $('.js-smusic-scroll--list', this.panel)
+                list: $('.js-smusic-scroll--list', this.panel),
+                listWrap: $('smusic-list--wrap', this.panel)
             },
             song: {
                 title: $('.js-smusic-song--title', smusic),
@@ -351,7 +352,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             data = self.playList;
         var html = '';
         data.forEach(function (item, index) {
-            var active = index === self.playIndex ? ' active' : '';
+            var active = (index === self.playIndex) ? ' active' : '';
             html += "<li class=\"js-smusic-song--item" + active + "\" data-song-index=\"" + index + "\">\n<span class=\"song-animate\"><i></i><i></i><i></i></span>\n<span class=\"song-title\" title=\"" + item.title + "\">" + item.title + "</span>\n<span class=\"song-singer\" title=\"" + item.singer + "\">" + item.singer + "</span>\n</li>";
         });
         list.innerHTML = html;
@@ -582,7 +583,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             if (utils.hasClass(this, 'active')) {
                 self.play();
             } else {
-                __playMusic.call(self, index);
+                __playMusic.call(self, parseInt(index));
             }
         });
     };
@@ -630,6 +631,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             });
             var currentSong = $$('.js-smusic-song--item', DOM.scroll.list)[index];
             currentSong && utils.addClass(currentSong, 'active');
+            
+            jQuery('.smusic-panel .smusic-list--wrap').animate({ scrollTop: currentSong.offsetTop }, "slow");
 
             AUDIO.src = song.audio;
             AUDIO.load();
