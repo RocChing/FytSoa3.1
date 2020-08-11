@@ -11,14 +11,14 @@ namespace FytSoa.Service.Interfaces.Music
     [IocService]
     public interface IMusicService : IBaseService<MusicInfo>
     {
-        Task<List<MusicListViewModel>> GetMusics();
+        Task<List<MusicListViewModel>> GetMusicsWithDb(string name);
 
         List<IMusic> GetMusics(string kw, int top = 10);
 
         Task<List<IMusic>> GetMusicsWithDb(SearchInput input);
 
-        Task<bool> AddMusicBySearch(SearchInput input);
+        Task<IMusic> AddMusicBySearch(SearchInput input);
 
-        Task<bool> AddMusicListBySearch(List<SearchInput> list);
+        Task<List<IMusic>> AddMusicListBySearch(List<SearchInput> list);
     }
 }

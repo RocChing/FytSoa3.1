@@ -27,10 +27,11 @@ namespace FytSoa.Service.Implements.Music
             this.musicListService = musicListService;
         }
 
-        public async Task<List<MusicListViewModel>> GetMusics()
+        public async Task<List<MusicListViewModel>> GetMusicsWithDb(string name)
         {
             List<MusicListViewModel> viewModel2s = new List<MusicListViewModel>();
-            var list = await listService.GetListAsync(it => true, it => it.Id, DbOrderEnum.Desc);
+            var list = await Db.Queryable<ListInfo>().WhereIF(!string.IsNullOrEmpty(name), m => m.Name == name).OrderBy(m => m.Id, OrderByType.Desc).ToListAsync();
+            //var list = await listService.GetListAsync(it => true, it => it.Id, DbOrderEnum.Desc);
 
             var list2 = await Db.Queryable<MusicListInfo>().Mapper(it => it.Music, it => it.MusicId).ToListAsync();
             if (list != null && list.Count > 0)
@@ -83,6 +84,19 @@ namespace FytSoa.Service.Implements.Music
                         list.Add(item.ToKugouMusic());
                     }
                 }
+
+                byte[] commit2 = Encoding.UTF8.GetBytes($"types=search&count={top}&source=netease&pages=1&name={kw}");
+                byte[] data2 = HttpWebClient.Post(url, commit);
+                string json2 = Encoding.UTF8.GetString(data);
+                Logger.Default.Debug(json2);
+                var netList = JsonConvert.DeserializeObject<NeteaseMusicInfo[]>(json);
+                if (netList != null && netList.Length > 0)
+                {
+                    foreach (var item in netList)
+                    {
+                        list.Add(item.ToNeteaseMusic());
+                    }
+                }
                 return list;
             }
             catch (Exception e)
@@ -117,23 +131,28 @@ namespace FytSoa.Service.Implements.Music
             return GetMusics(name, input.Top);
         }
 
-        public async Task<bool> AddMusicListBySearch(List<SearchInput> list)
+        public async Task<List<IMusic>> AddMusicListBySearch(List<SearchInput> list)
         {
             if (list == null || list.Count < 1)
             {
-                return false;
+                return null;
             }
+            List<IMusic> musics = new List<IMusic>();
             foreach (var item in list)
             {
-                await AddMusicBySearch(item);
+                var m = await AddMusicBySearch(item);
+                if (musics != null)
+                {
+                    musics.Add(m);
+                }
             }
-            return true;
+            return musics;
         }
 
-        public async Task<bool> AddMusicBySearch(SearchInput input)
+        public async Task<IMusic> AddMusicBySearch(SearchInput input)
         {
             var list = await GetMusicsWithDb(input);
-            Logger.Default.Info("the list json is:" + JsonConvert.SerializeObject(list));
+            //Logger.Default.Info("the list json is:" + JsonConvert.SerializeObject(list));
             if (list != null && list.Count > 0)
             {
                 bool addMusic = false;
@@ -143,10 +162,12 @@ namespace FytSoa.Service.Implements.Music
                     addMusic = false;
                     if (item.Name == input.Name && item.Artists.Contains(input.Author))
                     {
+                        Logger.Default.Debug(JsonConvert.SerializeObject(item));
                         if (string.IsNullOrEmpty(item.ConverUrl))
                         {
                             addMusic = true;
                             item.ConverUrl = GetCoverUrl(item);
+                            Logger.Default.Debug("ConverUrl url:" + item.ConverUrl);
                             if (string.IsNullOrEmpty(item.ConverUrl)) continue;
                         }
 
@@ -154,6 +175,7 @@ namespace FytSoa.Service.Implements.Music
                         {
                             addMusic = true;
                             item.MusicUrl = GetMusicUrl(item);
+                            Logger.Default.Debug("MusicUrl url:" + item.MusicUrl);
                             if (string.IsNullOrEmpty(item.MusicUrl)) continue;
                         }
 
@@ -161,6 +183,7 @@ namespace FytSoa.Service.Implements.Music
                         {
                             addMusic = true;
                             item.LrcInfo = GetLyricInfo(item);
+                            Logger.Default.Debug("LrcInfo json:" + JsonConvert.SerializeObject(item.LrcInfo));
                             if (item.LrcInfo == null) continue;
                         }
 
@@ -178,27 +201,34 @@ namespace FytSoa.Service.Implements.Music
                     }
                     string listName = DateTime.Now.ToString("yyyy-MM-dd");
                     int listId = await listService.Insert(listName);
-                    await musicListService.Insert(new MusicListInfo(listId, music.Id));
+                    bool flag = await musicListService.Insert(new MusicListInfo(listId, music.Id));
+                    return flag ? music : null;
                 }
                 else
                 {
                     Logger.Default.Warn("没有找到合适的歌曲!");
                 }
-                return true;
             }
-            return false;
+            return null;
         }
 
         private string GetCoverUrl(IMusic music)
         {
             try
             {
+                var origin = music.Origin;
+                if (origin == MusicOrigin.Netease)
+                {
+                    string pic_id = music.Id;
+                    string pwd = Utils.EncryptNeteaseId(pic_id);
+                    return $"https://p3.music.126.net/{pwd}/{pic_id}.jpg?param=300y300";
+                }
                 string url = $"{AppConstant.KUGOU_API_URL}?r=play/getdata&hash={music.Id}";
                 CookieCollection cookies = new CookieCollection();
                 cookies.Add(new Cookie("kg_mid", "emmmm"));
                 byte[] data = HttpWebClient.Get(url, "", ref cookies);
                 string json = Encoding.UTF8.GetString(data);
-                Logger.Default.Info("the json is :" + json);
+                Logger.Default.Info("the conver json value is :" + json);
                 return JObject.Parse(json)["data"]["img"].ToString();
             }
             catch (Exception e)
@@ -212,8 +242,9 @@ namespace FytSoa.Service.Implements.Music
         {
             try
             {
+                string type = GetOriginName(music.Origin);
                 string url = AppConstant.BLOG_API_URL;
-                byte[] commit = Encoding.UTF8.GetBytes($"types=lyric&id={music.Id}&source=kugou");
+                byte[] commit = Encoding.UTF8.GetBytes($"types=lyric&id={music.Id}&source={type}");
                 byte[] data = HttpWebClient.Post(url, commit);
                 JObject json = JObject.Parse(Encoding.UTF8.GetString(data));
                 string content = json["lyric"].ToString();
@@ -228,13 +259,22 @@ namespace FytSoa.Service.Implements.Music
 
         public string GetMusicUrl(IMusic music)
         {
-            string url = AppConstant.BLOG_API_URL;
-            byte[] commit = Encoding.UTF8.GetBytes($"types=url&id={music.Id}&source=kugou");
-            byte[] data = HttpWebClient.Post(url, commit);
-            string json = Encoding.UTF8.GetString(data);
-            Logger.Default.Info($"the json value is:{json}");
-            JObject obj = JObject.Parse(json);
-            return obj["url"].ToString();
+            try
+            {
+                string type = GetOriginName(music.Origin);
+                string url = AppConstant.BLOG_API_URL;
+                byte[] commit = Encoding.UTF8.GetBytes($"types=url&id={music.Id}&source={type}");
+                byte[] data = HttpWebClient.Post(url, commit);
+                string json = Encoding.UTF8.GetString(data);
+                Logger.Default.Info($"the url json value is:{json}");
+                JObject obj = JObject.Parse(json);
+                return obj["url"].ToString();
+            }
+            catch (Exception e)
+            {
+                Logger.Default.Error(e.Message, e);
+                return null;
+            }
         }
 
         private async Task AddMusicInfo(MusicInfo info)
@@ -245,6 +285,21 @@ namespace FytSoa.Service.Implements.Music
                 return;
             }
             await this.AddAsync(info);
+        }
+
+        private string GetOriginName(MusicOrigin origin)
+        {
+            string type = "";
+            switch (origin)
+            {
+                case MusicOrigin.Kugou:
+                    type = "kugou";
+                    break;
+                case MusicOrigin.Netease:
+                    type = "netease";
+                    break;
+            }
+            return type;
         }
     }
 }

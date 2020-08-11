@@ -7,6 +7,8 @@ using FytSoa.Core.Model.Music;
 using FytSoa.Service.Interfaces.Music;
 using FytSoa.Common;
 using FytSoa.Core.ViewModel.Music;
+using Microsoft.AspNetCore.SignalR;
+using System.Timers;
 
 namespace FytSoa.Api.Controllers
 {
@@ -14,16 +16,19 @@ namespace FytSoa.Api.Controllers
     [Route("api/[controller]")]
     public class MusicController : Controller
     {
+        private IHubContext<SongHub> hub;
         private IMusicService musicService;
-        public MusicController(IMusicService musicService)
+       
+        public MusicController(IMusicService musicService, IHubContext<SongHub> hub)
         {
             this.musicService = musicService;
+            this.hub = hub;
         }
 
         [HttpGet("getMusics")]
-        public async Task<ApiResult<List<MusicListViewModel>>> GetMusics()
+        public async Task<ApiResult<List<MusicListViewModel>>> GetMusics(string name = "")
         {
-            var list = await musicService.GetMusics();
+            var list = await musicService.GetMusicsWithDb(name);
             return ApiResult<List<MusicListViewModel>>.Success(list);
         }
 
@@ -42,17 +47,39 @@ namespace FytSoa.Api.Controllers
         }
 
         [HttpPost("add")]
-        public async Task<ApiResult<bool>> AddMusicBySearch([FromBody] SearchInput input)
+        public async Task<ApiResult<string>> AddMusicBySearch([FromBody] SearchInput input)
         {
-            bool flag = await musicService.AddMusicBySearch(input);
-            return ApiResult<bool>.Success(flag);
+            var model = await musicService.AddMusicBySearch(input);
+            await SendHubMsg(model);
+            string msg = model != null ? "歌曲添加成功" : "没有找到合适的歌曲";
+            return ApiResult<string>.Success(msg);
         }
 
         [HttpPost("addList")]
-        public async Task<ApiResult<bool>> AddMusicListBySearch([FromBody] List<SearchInput> list)
+        public async Task<ApiResult<string>> AddMusicListBySearch([FromBody] List<SearchInput> list)
         {
-            bool flag = await musicService.AddMusicListBySearch(list);
-            return ApiResult<bool>.Success(flag);
+            var musics = await musicService.AddMusicListBySearch(list);
+            await SendHubMsg(musics);
+            string msg = musics != null && musics.Count > 0 ? "歌曲添加成功" : "没有找到合适的歌曲";
+            return ApiResult<string>.Success(msg);
+        }
+
+        private async Task SendHubMsg(IMusic model)
+        {
+            if (model != null && !string.IsNullOrEmpty(model.Id))
+            {
+                List<IMusic> list = new List<IMusic>();
+                list.Add(model);
+                await SendHubMsg(list);
+            }
+        }
+
+        private async Task SendHubMsg(List<IMusic> list)
+        {
+            if (list != null && list.Count > 0)
+            {
+                await hub.Clients.All.SendAsync(Core.AppConstant.SONG_HUB_AddSong, list);
+            }
         }
     }
 }

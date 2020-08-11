@@ -155,8 +155,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         var panel = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'list';
         var isList = panel === 'list';
         var panelClass = isList ? 'show-list' : '';
-        
+
         return "<main class=\"smusic-main\">\n    <div class=\"smusic-panel\">\n        <div class=\"smusic-music-info\">\n            <div class=\"smusic-music-scroll js-smusic-scroll--title\">\n                <strong class=\"smusic-music--title js-smusic-song--title\">Smusic</strong>\n                <small class=\"smusic-music--singer js-smusic-song--singer\">smohan</small>\n            </div>\n        </div>\n        <figure class=\"smusic-music-thumbnail\">\n            <img src=\"" + thumbnailPlaceholder + "\" class=\"js-smusic-song--thumbnail\" />\n        </figure>\n                <div class=\"smusic-music-ctrl\">\n            <a class=\"smusic-ctrl--prev js-smusic-btn--prev\" title=\"\u4E0A\u4E00\u9996\"><i class=\"smusic-ico-prev\"></i></a>\n            <a class=\"smusic-ctrl--play smusic-music-play js-smusic-btn--play\" title=\"\u6682\u505C\"></a>\n            <a class=\"smusic-ctrl--next js-smusic-btn--next\"><i class=\"smusic-ico-next\" title=\"\u4E0B\u4E00\u9996\"></i></a>\n        </div>\n           </div>\n    <div class=\"smusic-panel\" style=\"width:40%\">\n <div class=\"smusic-panel--scroll js-smusic-scroll--panel\">  <div class=\"smusic-lyric--wrap\">\n                <ul class=\"smusic-lyric--scroll js-smusic-scroll--lyric\"></ul>\n    </div> </div></div>     <div class=\"smusic-panel\">  <div class=\"smusic-panel--scroll js-smusic-scroll--panel\">    <div class=\"smusic-list--wrap\">\n                <ul class=\"smusic-list--scroll js-smusic-scroll--list\"></ul>\n    </div> </div>\n        </div>\n  </main>\n<aside class=\"smusic-aside\">\n    <div class=\"smusic-ctrl smusic-ctrl--left\">\n        <div class=\"smusic-ctrl--volume\">\n            <a class=\"smusic-volume--toggle js-smusic-btn--volume\"></a>\n            <div class=\"smusic-volume--bar js-smusic-volume--bar\">\n                <span class=\"smusic-volume--value js-smusic-volume--value\"></span>\n                <span class=\"smusic-volume--slider js-smusic-volume--slider\"></span>\n            </div>\n        </div>\n        <a class=\"smusic-ctrl--mode smusic-mode--loop js-smusic-btn--mode\" data-play-mode=\"1\"></a>\n    </div>\n    <div class=\"smusic-progress js-smusic-progress\">\n        <span class=\"smusic-progress--buffer js-smusic-progress--buffer\"></span>\n        <span class=\"smusic-progress--value js-smusic-progress--value\"><i class=\"smusic-progress--slider js-smusic-progress--slider\"></i></span>\n    </div>\n    <div class=\"smusic-ctrl smusic-ctrl--right\">\n        <time class=\"smusic-time js-smusic-time\">00:00/00:00</time>\n        <a class=\"smusic-ctrl--lyric js-smusic-btn--lyric js-smusic-panel--tab " + (!isList ? 'active' : '') + "\" data-panel=\"lyric\" title=\"\u6B4C\u8BCD\"><i class=\"smusic-ico-lyric\"></i></a>\n        <a class=\"smusic-ctrl--list js-smusic-btn--list js-smusic-panel--tab " + (isList ? 'active' : '') + "\" data-panel=\"list\" title=\"\u5217\u8868\"><i class=\"smusic-ico-list\"></i></a>\n    </div>\n</aside>";
+        //
     };
 
     //歌词缓存
@@ -594,60 +595,64 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
      * @private
      */
     var __playMusic = function __playMusic(index, callback, isInit) {
-        var _ref5 = [this.dom, this.audio, this.playList.length],
-            DOM = _ref5[0],
-            AUDIO = _ref5[1],
-            listLength = _ref5[2];
-        //index 调整
+        try {
+            var _ref5 = [this.dom, this.audio, this.playList.length],
+                DOM = _ref5[0],
+                AUDIO = _ref5[1],
+                listLength = _ref5[2];
+            //index 调整
 
-        index >= listLength - 1 && (index = listLength - 1);
-        index <= 0 && (index = 0);
-        this.playIndex = index;
-        //当前播放歌曲信息
-        var song = this.playList[this.playIndex];
-        if (!song) {
-            log("没有要播放的歌曲");
-            return false;
+            index >= listLength - 1 && (index = listLength - 1);
+            index <= 0 && (index = 0);
+            this.playIndex = index;
+            //当前播放歌曲信息
+            var song = this.playList[this.playIndex];
+            if (!song) {
+                log("没有要播放的歌曲");
+                return false;
+            }
+            var tempHandle = function () {
+                return __setBuffer.call(this);
+            }.bind(this);
+            //在canplay事件监听前移除之前的监听
+            AUDIO.removeEventListener('canplay', tempHandle, false);
+            _bufferTimer[this.smusicId] && clearInterval(_bufferTimer[this.smusicId]);
+
+            //刷新DOM
+            DOM.progress.buffer.style.width = '0px';
+            DOM.progress.value.style.width = '0px';
+            DOM.time.textContent = '00:00/00:00';
+            DOM.scroll.lyric.style.transform = 'translate3d(0, 0, 0)';
+            DOM.scroll.lyric.innerHTML = "<li class=\"empty\">\u6B63\u5728\u52A0\u8F7D\u6B4C\u8BCD...</li>";
+
+            $$('.js-smusic-song--item.active', DOM.scroll.list).forEach(function (item) {
+                item && utils.removeClass(item, 'active, pause');
+            });
+            var currentSong = $$('.js-smusic-song--item', DOM.scroll.list)[index];
+            currentSong && utils.addClass(currentSong, 'active');
+
+            AUDIO.src = song.audio;
+            AUDIO.load();
+            AUDIO.addEventListener('canplay', tempHandle, false);
+            if (isInit) {
+                this.config.autoPlay && AUDIO.play();
+            } else {
+                AUDIO.play();
+            }
+            var title = song.title || 'Smusic',
+                singer = song.singer || 'singer',
+                thumbnail = song.thumbnail || thumbnailPlaceholder;
+
+            DOM.song.title.textContent = title;
+            DOM.song.singer.textContent = singer;
+            DOM.song.thumbnail.src = thumbnail;
+            DOM.scroll.title.setAttribute('title', singer + " - " + title);
+            //加载歌词
+            __renderLyric.call(this);
+            callback && callback.call(this, song);
+        } catch (e) {
+            log(e);
         }
-        var tempHandle = function () {
-            return __setBuffer.call(this);
-        }.bind(this);
-        //在canplay事件监听前移除之前的监听
-        AUDIO.removeEventListener('canplay', tempHandle, false);
-        _bufferTimer[this.smusicId] && clearInterval(_bufferTimer[this.smusicId]);
-
-        //刷新DOM
-        DOM.progress.buffer.style.width = '0px';
-        DOM.progress.value.style.width = '0px';
-        DOM.time.textContent = '00:00/00:00';
-        DOM.scroll.lyric.style.transform = 'translate3d(0, 0, 0)';
-        DOM.scroll.lyric.innerHTML = "<li class=\"empty\">\u6B63\u5728\u52A0\u8F7D\u6B4C\u8BCD...</li>";
-
-        $$('.js-smusic-song--item.active', DOM.scroll.list).forEach(function (item) {
-            item && utils.removeClass(item, 'active, pause');
-        });
-        var currentSong = $$('.js-smusic-song--item', DOM.scroll.list)[index];
-        currentSong && utils.addClass(currentSong, 'active');
-
-        AUDIO.src = song.audio;
-        AUDIO.load();
-        AUDIO.addEventListener('canplay', tempHandle, false);
-        if (isInit) {
-            this.config.autoPlay && AUDIO.play();
-        } else {
-            AUDIO.play();
-        }
-        var title = song.title || 'Smusic',
-            singer = song.singer || 'singer',
-            thumbnail = song.thumbnail || thumbnailPlaceholder;
-
-        DOM.song.title.textContent = title;
-        DOM.song.singer.textContent = singer;
-        DOM.song.thumbnail.src = thumbnail;
-        DOM.scroll.title.setAttribute('title', singer + " - " + title);
-        //加载歌词
-        __renderLyric.call(this);
-        callback && callback.call(this, song);
     };
 
     /**
@@ -753,7 +758,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     singer: music.singer || '歌手名',
                     audio: music.audio,
                     thumbnail: music.thumbnail || thumbnailPlaceholder,
-                    lyric: music.lyric | ''
+                    lyric: music.lyric || '',
+                    words: music.words || []
                 });
                 this.refreshList();
                 callback && callback();

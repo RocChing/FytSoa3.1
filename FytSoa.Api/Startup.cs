@@ -36,6 +36,18 @@ namespace FytSoa.Api
             //services.AddHttpClient();
             services.RegisterAssembly("FytSoa.Service");
             services.AddTransient(typeof(IBaseService<>), typeof(BaseService<>));
+
+            //services.AddCors(options => options.AddPolicy("SignalR",
+            //   builder =>
+            //   {
+            //       builder.AllowAnyMethod() //允许任意请求方式
+            //              .AllowAnyHeader() //允许任意header
+            //              .AllowCredentials()//允许验证
+            //              .WithOrigins(new string[] { "http://127.0.0.1" });
+            //       //.SetIsOriginAllowed(_ => true); //指定特定域名才能访问
+            //   }));
+
+            services.AddSignalR();
             services.AddRazorPages();
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -45,6 +57,8 @@ namespace FytSoa.Api
                 var xmlPath = Path.Combine(basePath, "FytSoa.Api.xml");
                 c.IncludeXmlComments(xmlPath);
             });
+
+            services.AddHostedService<SongHubBackgroudService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -57,7 +71,7 @@ namespace FytSoa.Api
             //加载配置文件
             NLog.LogManager.LoadConfiguration("nlog.config").GetCurrentClassLogger();
             app.UseStaticFiles();
-
+            //app.UseCors("SignalR");
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
@@ -70,6 +84,7 @@ namespace FytSoa.Api
             {
                 endpoints.MapControllers();
                 endpoints.MapRazorPages();
+                endpoints.MapHub<SongHub>("/songHub");
             });
         }
     }

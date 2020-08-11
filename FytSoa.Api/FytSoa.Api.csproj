@@ -36,6 +36,5 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Pages\Views\" />
-    <Folder Include="wwwroot\libs\" />
   </ItemGroup>
 </Project>

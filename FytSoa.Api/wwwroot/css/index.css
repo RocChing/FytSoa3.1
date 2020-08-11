@@ -1,5 +1,5 @@
 ﻿body {
-    padding: 20px;
+    padding: 0px 20px;
     background-color: #2e86ef;
     font: 14px / 1.5 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'WenQuanYi Micro Hei', 'Microsoft Yahei', Arial, sans-serif;
 }
@@ -7,6 +7,10 @@
 .tip {
     text-align: center;
     font-size: 50px;
+}
+
+.dg {
+    text-align: right;
 }
 
 h1 {

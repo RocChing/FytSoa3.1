@@ -25,7 +25,7 @@ namespace FytSoa.Service.Implements.Music
             var model = await this.GetModelAsync(m => m.ListId == info.ListId && m.MusicId == info.MusicId);
             if (model != null && model.Id > 0)
             {
-                return true;
+                return false;
             }
             bool flag = await this.AddAsync(info);
             if (flag)
