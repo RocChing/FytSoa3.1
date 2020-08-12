@@ -53,9 +53,9 @@ namespace FytSoa.Api
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "FytSoa API", Version = "v1" });
-                var basePath = PlatformServices.Default.Application.ApplicationBasePath;
-                var xmlPath = Path.Combine(basePath, "FytSoa.Api.xml");
-                c.IncludeXmlComments(xmlPath);
+                //var basePath = PlatformServices.Default.Application.ApplicationBasePath;
+                //var xmlPath = Path.Combine(basePath, "FytSoa.Api.xml");
+                //c.IncludeXmlComments(xmlPath);
             });
 
             services.AddHostedService<SongHubBackgroudService>();
