@@ -212,6 +212,7 @@
     position: relative;
     text-align: center;
     overflow-y:hidden;
+    overflow-x:hidden;
   }
     .smusic-container > .smusic-main > .smusic-panel:last-of-type {
       overflow: hidden;

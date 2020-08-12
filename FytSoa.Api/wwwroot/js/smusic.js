@@ -596,6 +596,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
      */
     var __playMusic = function __playMusic(index, callback, isInit) {
         try {
+            clearInterval(_rotation_interval);
             var _ref5 = [this.dom, this.audio, this.playList.length],
                 DOM = _ref5[0],
                 AUDIO = _ref5[1],
@@ -630,7 +631,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             });
             var currentSong = $$('.js-smusic-song--item', DOM.scroll.list)[index];
             currentSong && utils.addClass(currentSong, 'active');
-            
+
             jQuery('.smusic-panel .smusic-list--wrap').animate({ scrollTop: currentSong.offsetTop }, "slow");
 
             AUDIO.src = song.audio;
@@ -651,11 +652,27 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             DOM.scroll.title.setAttribute('title', singer + " - " + title);
             //加载歌词
             __renderLyric.call(this);
+            _rotation(DOM.song.thumbnail);
             callback && callback.call(this, song);
         } catch (e) {
             log(e);
         }
     };
+
+    var _rotation_rotateVal = 0;
+    var _rotation_interval = 0;
+    var _rotation = function _rotation(img) {
+        _rotation_interval = setInterval(function () {
+            _rotation_rotateVal += 10;
+            // 设置旋转属性(顺时针)
+            img.style.transform = 'rotate(' + _rotation_rotateVal + 'deg)';
+            // 设置旋转属性(逆时针)
+            //img.style.transform = 'rotate(-' + rotateVal + 'deg)'
+            // 设置旋转时的动画  匀速0.1s
+            img.style.transition = '1s linear';
+        }, 1000);
+    };
+
 
     /**
      * smusic
@@ -884,7 +901,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         };
 
         //初始化
-        SmohanMusic.prototype.init = function init() {
+        SmohanMusic.prototype.init = function init(callback) {
             var _ref7 = [this.config, _createDom(this.config)],
                 config = _ref7[0],
                 create = _ref7[1];
@@ -908,6 +925,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     if (!config.autoPlay) {
                         utils.trigger(this.dom.btn.play, 'click');
                     }
+                    callback && callback();
                 }, true);
             } else {
                 log("歌曲列表为空");
@@ -943,8 +961,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
      * @param config
      * @constructor
      */
-
-
     win.SMusic = function (playList, config) {
         return new SmohanMusic(playList, config);
     };

@@ -73,5 +73,6 @@ $(function () {
             $('#list_number').text(number);
         }
     }
+   
     init();
 });
