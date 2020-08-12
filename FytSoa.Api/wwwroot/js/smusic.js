@@ -310,8 +310,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 title: $('.js-smusic-scroll--title', smusic),
                 panel: $('.js-smusic-scroll--panel', smusic),
                 lyric: $('.js-smusic-scroll--lyric', this.panel),
-                list: $('.js-smusic-scroll--list', this.panel),
-                listWrap: $('smusic-list--wrap', this.panel)
+                list: $('.js-smusic-scroll--list', this.panel)
             },
             song: {
                 title: $('.js-smusic-song--title', smusic),

@@ -1,16 +1,23 @@
 ﻿body {
     padding: 0px 20px;
-    background-color: #2e86ef;
+    /*background-color: #2e86ef;*/
+    background-color: bisque;
     font: 14px / 1.5 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'WenQuanYi Micro Hei', 'Microsoft Yahei', Arial, sans-serif;
 }
 
 .tip {
     text-align: center;
-    font-size: 50px;
+    font-size: 45px;
+    color: gray;
 }
 
 .dg {
     text-align: right;
+}
+
+.hg {
+    line-height: 50px;
+    height: 50px;
 }
 
 h1 {
