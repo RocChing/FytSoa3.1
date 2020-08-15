@@ -11,27 +11,37 @@ $(function () {
 
         connection.on("OnConnected", function (model) {
             if (model) {
-                console.log(model);
-                var list = model.musicList;
-                var songList = [];
-                if (list && list.length > 0) {
-                    for (var i = 0; i < list.length; i++) {
-                        songList.push(convertMusicObj(list[i]));
-                    }
-                }
+                var songList = getMusicList(model.musicList);
                 updateUI(model.listName, model.number);
             }
             initMusic(songList);
         });
 
-        connection.on("AddSong", function (list) {
+        connection.on("AddSong", function (list, fansName) {
             if (list && list.length > 0) {
+                var mm = null;
                 for (var i = 0; i < list.length; i++) {
                     var m = convertMusicObj(list[i]);
                     music.addSong(m);
+                    mm = m;
                 }
-                console.log("playIndex:" + music.playIndex);
-                updateUI(null, music.playList.length);
+                updateUI(null, music.playList.length, mm, fansName);
+            }
+        });
+
+        connection.on('PlaySong', function (id) {
+            music.playById(id);
+        });
+
+        connection.on('DeleteSong', function (id) {
+            music.deleteSong(id);
+        });
+
+        connection.on('UpdateSongSortId', function (model) {
+            if (model) {
+                var songList = getMusicList(model.musicList);
+                updateUI(model.listName, model.number);
+                music.updateList(songList);
             }
         });
 
@@ -55,8 +65,19 @@ $(function () {
         music.init();
     }
 
+    function getMusicList(list) {
+        var songList = [];
+        if (list && list.length > 0) {
+            for (var i = 0; i < list.length; i++) {
+                songList.push(convertMusicObj(list[i]));
+            }
+        }
+        return songList;
+    }
+
     function convertMusicObj(m) {
         return {
+            id: m.id,
             title: m.name,
             singer: m.artists,
             thumbnail: m.converUrl,
@@ -65,14 +86,18 @@ $(function () {
         };
     }
 
-    function updateUI(title, number) {
+    function updateUI(title, number, m, fansName) {
         if (title) {
             $('#list_title').text(title);
         }
         if (number) {
             $('#list_number').text(number);
         }
+        if (m) {
+            var ad = "[" + fansName + "]点了歌曲[" + m.title + "#" + m.singer + "]";
+            $('#ad').text(ad);
+        }
     }
-   
+
     init();
 });

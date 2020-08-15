@@ -27,13 +27,81 @@ namespace FytSoa.Service.Implements.Music
             this.musicListService = musicListService;
         }
 
+        public async Task<List<MusicListViewModel>> UpdateSortId(int id, int sortId)
+        {
+            bool flag = await musicListService.UpdateSortId(id, sortId);
+            if (flag)
+            {
+                return await GetMusicsWithDb(GetCurrentListName());
+            }
+            return null;
+        }
+
+        public async Task<IMusic> GetMusicByName(string name)
+        {
+            var model = await this.GetModelAsync(m => m.Name.Contains(name));
+            if (model != null)
+            {
+                return model.ToMusic();
+            }
+            return null;
+        }
+
+        public async Task<List<MusicViewModel>> GetMusicList(GetSearchInput input)
+        {
+            string listName = input.ListName;
+            if (!string.IsNullOrEmpty(listName))
+            {
+                listName = GetCurrentListName();
+            }
+            return await Db.Queryable<MusicListInfo, ListInfo, MusicInfo>((ml, l, m) => new JoinQueryInfos(JoinType.Left, ml.ListId == l.Id, JoinType.Left, ml.MusicId == m.MusicId))
+                  .WhereIF(!string.IsNullOrEmpty(listName), (ml, l, m) => m.Name == listName)
+                  .WhereIF(!string.IsNullOrEmpty(input.Name), (ml, l, m) => m.Name.Contains(input.Name))
+                  .WhereIF(!string.IsNullOrEmpty(input.Author), (ml, l, m) => m.Artists.Contains(input.Author))
+                  .OrderBy((ml, l, m) => ml.SortId, OrderByType.Desc)
+                  .OrderBy((ml, l, m) => ml.Id)
+                  .Select((ml, l, m) => new MusicViewModel()
+                  {
+                      Id = ml.Id,
+                      Artists = m.Artists,
+                      Name = m.Name,
+                      SortId = ml.SortId,
+                      MusicId = m.MusicId
+                  })
+                  .ToListAsync();
+        }
+
+        public async Task<bool> DeleteMusic(string musicId)
+        {
+            try
+            {
+                await musicListService.DeleteAsync(m => m.MusicId == musicId);
+                await this.DeleteAsync(m => m.MusicId == musicId);
+                string listName = GetCurrentListName();
+                await listService.SubNumber(listName);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Logger.Default.Error(e.Message, e);
+                return false;
+            }
+        }
+
         public async Task<List<MusicListViewModel>> GetMusicsWithDb(string name)
         {
             List<MusicListViewModel> viewModel2s = new List<MusicListViewModel>();
             var list = await Db.Queryable<ListInfo>().WhereIF(!string.IsNullOrEmpty(name), m => m.Name == name).OrderBy(m => m.Id, OrderByType.Desc).ToListAsync();
-            //var list = await listService.GetListAsync(it => true, it => it.Id, DbOrderEnum.Desc);
 
-            var list2 = await Db.Queryable<MusicListInfo>().Mapper(it => it.Music, it => it.MusicId).ToListAsync();
+            var list2 = await Db.Queryable<MusicListInfo, MusicInfo>((ml, m) => new JoinQueryInfos(JoinType.Left, ml.MusicId == m.MusicId))
+                .Select((ml, m) => new MusicListViewModel2()
+                {
+                    ListId = ml.ListId,
+                    SortId = ml.SortId,
+                    Id = ml.Id,
+                    Music = m
+                })
+                .ToListAsync();
             if (list != null && list.Count > 0)
             {
                 foreach (var item in list)
@@ -45,7 +113,7 @@ namespace FytSoa.Service.Implements.Music
 
                     if (list2 != null && list2.Count > 0)
                     {
-                        var list3 = list2.FindAll(m => m.ListId == item.Id);
+                        var list3 = list2.Where(m => m.ListId == item.Id).OrderByDescending(m => m.SortId).ThenBy(m => m.Id).ToList();
                         if (list3 != null && list3.Count > 0)
                         {
                             foreach (var music in list3)
@@ -129,11 +197,18 @@ namespace FytSoa.Service.Implements.Music
                     }
                 }
             }
+
             if (list.Count > 0)
             {
                 return list;
             }
-            return GetMusics(name, input.Top);
+
+            string word = input.Word;
+            if (string.IsNullOrEmpty(word))
+            {
+                word = name;
+            }
+            return GetMusics(word, input.Top);
         }
 
         public async Task<List<IMusic>> AddMusicListBySearch(List<SearchInput> list)
@@ -157,57 +232,77 @@ namespace FytSoa.Service.Implements.Music
         public async Task<IMusic> AddMusicBySearch(SearchInput input)
         {
             var list = await GetMusicsWithDb(input);
-            //Logger.Default.Info("the list json is:" + JsonConvert.SerializeObject(list));
             if (list != null && list.Count > 0)
             {
                 bool addMusic = false;
+                bool findMusic = true;
                 IMusic music = null;
-                foreach (var item in list)
+
+                bool flag = !string.IsNullOrEmpty(input.Id);
+                if (flag)
                 {
-                    addMusic = false;
-                    if (item.Name == input.Name && item.Artists.Contains(input.Author))
-                    {
-                        Logger.Default.Debug(JsonConvert.SerializeObject(item));
-                        if (string.IsNullOrEmpty(item.ConverUrl))
-                        {
-                            addMusic = true;
-                            item.ConverUrl = GetCoverUrl(item);
-                            Logger.Default.Debug("ConverUrl url:" + item.ConverUrl);
-                            if (string.IsNullOrEmpty(item.ConverUrl)) continue;
-                        }
+                    music = list.FirstOrDefault(m => m.Id == input.Id);
+                }
 
-                        if (string.IsNullOrEmpty(item.MusicUrl))
-                        {
-                            addMusic = true;
-                            item.MusicUrl = GetMusicUrl(item);
-                            Logger.Default.Debug("MusicUrl url:" + item.MusicUrl);
-                            if (string.IsNullOrEmpty(item.MusicUrl)) continue;
-                        }
+                if (music == null)
+                {
+                    music = list.FirstOrDefault(m => m.Name == input.Name && m.Artists.Contains(input.Author));
+                }
 
-                        if (item.LrcInfo == null)
-                        {
-                            addMusic = true;
-                            item.LrcInfo = GetLyricInfo(item);
-                            Logger.Default.Debug("LrcInfo json:" + JsonConvert.SerializeObject(item.LrcInfo));
-                            if (item.LrcInfo == null) continue;
-                        }
-
-                        music = item;
-                        break;
-                    }
+                if (music == null)
+                {
+                    Logger.Default.Warn("没有找到合适的歌曲!");
+                    return null;
                 }
 
                 if (music != null)
                 {
+                    Logger.Default.Debug(JsonConvert.SerializeObject(music));
+                    if (string.IsNullOrEmpty(music.ConverUrl))
+                    {
+                        addMusic = true;
+                        music.ConverUrl = GetCoverUrl(music);
+                        Logger.Default.Debug("ConverUrl url:" + music.ConverUrl);
+                        if (string.IsNullOrEmpty(music.ConverUrl))
+                        {
+                            findMusic = false;
+                        }
+                    }
+
+                    if (string.IsNullOrEmpty(music.MusicUrl))
+                    {
+                        addMusic = true;
+                        music.MusicUrl = GetMusicUrl(music);
+                        Logger.Default.Debug("MusicUrl url:" + music.MusicUrl);
+                        if (string.IsNullOrEmpty(music.MusicUrl))
+                        {
+                            findMusic = false;
+                        }
+                    }
+
+                    if (music.LrcInfo == null)
+                    {
+                        addMusic = true;
+                        music.LrcInfo = GetLyricInfo(music);
+                        Logger.Default.Debug("LrcInfo json:" + JsonConvert.SerializeObject(music.LrcInfo));
+                        if (music.LrcInfo == null)
+                        {
+                            findMusic = false;
+                        }
+                    }
+                }
+
+                if (findMusic)
+                {
                     if (addMusic)
                     {
                         var musicInfo = new MusicInfo(music);
-                        await this.AddMusicInfo(musicInfo);
+                        await AddMusicInfo(musicInfo);
                     }
-                    string listName = DateTime.Now.ToString("yyyy-MM-dd");
+                    string listName = GetCurrentListName();
                     int listId = await listService.Insert(listName);
-                    bool flag = await musicListService.Insert(new MusicListInfo(listId, music.Id));
-                    return flag ? music : null;
+                    bool flag4 = await musicListService.Insert(new MusicListInfo(listId, music.Id, input.SortId));
+                    return flag4 ? music : null;
                 }
                 else
                 {
@@ -342,6 +437,11 @@ namespace FytSoa.Service.Implements.Music
                     break;
             }
             return type;
+        }
+
+        private string GetCurrentListName()
+        {
+            return DateTime.Now.ToString("yyyy-MM-dd");
         }
     }
 }

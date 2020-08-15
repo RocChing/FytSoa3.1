@@ -20,6 +20,13 @@
     height: 50px;
 }
 
+.ad {
+    margin: 10px auto;
+    text-align: right;
+    font-size: 45px;
+    color: brown;
+}
+
 h1 {
     font-size: 36px;
     color: #fff;

@@ -106,6 +106,36 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
     var uid = 1;
 
+    //读取cookies
+    var getCookie = function getCookie(name) {
+        var arr, reg = new RegExp("(^| )" + name + "=([^;]*)(;|$)");
+        if (arr = document.cookie.match(reg))
+            return unescape(arr[2]);
+        else
+            return null;
+    };
+
+    //程序代码
+    var setCookie = function setCookie(name, value, time) {
+        function getSec(str) {
+            var str1 = str.substring(1, str.length) * 1;
+            var str2 = str.substring(0, 1);
+            if (str2 === "s") {
+                return str1 * 1000;
+            }
+            else if (str2 === "h") {
+                return str1 * 60 * 60 * 1000;
+            }
+            else if (str2 === "d") {
+                return str1 * 24 * 60 * 60 * 1000;
+            }
+        }
+        var strsec = getSec(time);
+        var exp = new Date();
+        exp.setTime(exp.getTime() + strsec * 1);
+        document.cookie = name + "=" + escape(value) + ";expires=" + exp.toGMTString();
+    };
+
     /**
      * 抛出异常
      * @param message
@@ -576,14 +606,29 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             }
         });
 
+        var _click_timeout = 0;
         //点击列表
         bind(DOM.scroll.list, 'click', '.js-smusic-song--item', function (event) {
+            console.log(event);
+            clearTimeout(_click_timeout);
+            var that = this;
+            _click_timeout = setTimeout(function () {
+                var index = that.getAttribute('data-song-index');
+                if (utils.hasClass(that, 'active')) {
+                    self.play();
+                } else {
+                    __playMusic.call(self, parseInt(index));
+                }
+            }, 500);
+        });
+
+        bind(DOM.scroll.list, 'dblclick', '.js-smusic-song--item', function (event) {
+            clearTimeout(_click_timeout);
             var index = this.getAttribute('data-song-index');
-            if (utils.hasClass(this, 'active')) {
-                self.play();
-            } else {
-                __playMusic.call(self, parseInt(index));
-            }
+            self.deleteSongByIndex(parseInt(index));
+            event.stopPropagation();
+            event.preventDefault();
+            event.cancelBubble = true;
         });
     };
 
@@ -642,19 +687,28 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             } else {
                 AUDIO.play();
             }
+            //存cookie
+            setCookie('music_id', song.id, 'd1');
+
             var title = song.title || 'Smusic',
                 singer = song.singer || 'singer',
                 thumbnail = song.thumbnail || thumbnailPlaceholder;
 
             DOM.song.title.textContent = title;
             DOM.song.singer.textContent = singer;
-            DOM.song.thumbnail.src = thumbnail;
             DOM.scroll.title.setAttribute('title', singer + " - " + title);
+            DOM.song.thumbnail.onerror = function () {
+                this.src = thumbnailPlaceholder;
+            };
+            DOM.song.thumbnail.onload = function () {
+                _rotation(this);
+            };
+            DOM.song.thumbnail.src = thumbnail;
             //加载歌词
             __renderLyric.call(this);
-            _rotation(DOM.song.thumbnail);
             callback && callback.call(this, song);
         } catch (e) {
+            log('加载出错');
             log(e);
         }
     };
@@ -738,9 +792,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             } else {
                 switch (playMode) {
                     case 1:
-                        if (type == 'prev') {
+                        if (type === 'prev') {
                             index = playIndex <= songLength - 1 && playIndex > 0 ? playIndex - 1 : songLength - 1;
-                        } else if (type == 'next' || type == 'ended') {
+                        } else if (type === 'next' || type === 'ended') {
                             index = playIndex >= songLength - 1 ? 0 : playIndex + 1;
                         }
                         break;
@@ -748,9 +802,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                         index = _getRandomIndex(playIndex, songLength);
                         break;
                     case 3:
-                        if (type == 'prev') {
+                        if (type === 'prev') {
                             index = playIndex <= songLength - 1 && playIndex > 0 ? playIndex - 1 : songLength - 1;
-                        } else if (type == 'next') {
+                        } else if (type === 'next') {
                             index = playIndex >= songLength - 1 ? 0 : playIndex + 1;
                         } else {
                             index = playIndex;
@@ -773,6 +827,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
             if (music && music.audio) {
                 this.playList.push({
+                    id: music.id || 'none',
                     title: music.title || '歌曲名',
                     singer: music.singer || '歌手名',
                     audio: music.audio,
@@ -786,6 +841,51 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 callback && callback("添加失败，参数不是一个对象或者未设置audio属性");
             }
             return this.playList;
+        };
+
+        SmohanMusic.prototype.deleteSong = function deleteSong() {
+            var musicId = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+            var index = -1;
+            this.playList.forEach(function (item, i) {
+                if (item.id === musicId) {
+                    index = i;
+                }
+            });
+            this.deleteSongByIndex(index);
+        };
+
+        SmohanMusic.prototype.deleteSongByIndex = function deleteSongByIndex() {
+            var index = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : -1;
+            if (index > -1) {
+                var pIndex = this.playIndex;
+                this.playList.splice(index, 1);
+
+                if (index <= pIndex) {
+                    this.playIndex--;
+                }
+
+                this.refreshList();
+                if (index === pIndex) {
+                    this.next();
+                }
+            }
+        };
+
+        SmohanMusic.prototype.updateList = function updateList() {
+            var list = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+            if (list && list.length > 0) {
+                var song = this.getCurrentInfo();
+                var index = 0;
+                var currentTime = this.audio.currentTime;
+                this.playList = list;
+                var len = this.playList.length;
+                if (song) {
+                    index = this.getPlayIndex(song.id);
+                }
+                this.playIndex = index;
+                this.refreshList();
+                this.play();
+            }
         };
 
         //刷新播放列表
@@ -806,7 +906,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
          * @param callback
          */
         SmohanMusic.prototype.prev = function prev(callback) {
-            this.playByMode('next', callback);
+            this.playByMode('prev', callback);
         };
 
         /**
@@ -821,7 +921,17 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             var $currentSong = $('.js-smusic-song--item.active', this.dom.scroll.list);
             utils.removeClass($currentSong, 'pause');
             this.playList.length && this.audio.play();
+            if (_rotation_interval === 0) {
+                _rotation(this.dom.song.thumbnail);
+            }
             callback && callback.call(this, this.playList[this.playIndex]);
+        };
+
+        SmohanMusic.prototype.playById = function playById() {
+            var musicId = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+            var index = this.getPlayIndex(musicId);
+            this.playIndex = index;
+            this.playByMode(undefined);
         };
 
         /**
@@ -836,6 +946,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             utils.addClass($currentSong, 'pause');
             BTN.setAttribute('title', '播放');
             this.playList.length && this.audio.pause();
+            clearInterval(_rotation_interval);
+            _rotation_interval = 0;
             callback && callback.call(this, this.playList[this.playIndex]);
         };
 
@@ -900,6 +1012,29 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             this.playMode = mode;
         };
 
+        SmohanMusic.prototype.getPlayIndex = function getPlayIndex(id) {
+            var len = this.playList.length;
+            var index = 0;
+            if (!id) {
+                return index;
+            }
+            if (len) {
+                for (var i = 0; i < len; i++) {
+                    var item = this.playList[i];
+                    if (id === item.id) {
+                        index = i;
+                        break;
+                    }
+                }
+            }
+            return index;
+        };
+
+        SmohanMusic.prototype.getPlayIndexByCookie = function getPlayIndexByCookie() {
+            var id = getCookie('music_id');
+            return this.getPlayIndex(id);
+        };
+
         //初始化
         SmohanMusic.prototype.init = function init(callback) {
             var _ref7 = [this.config, _createDom(this.config)],
@@ -921,6 +1056,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             this.setMode(this.playMode);
 
             if (this.playList.length) {
+                this.playIndex = this.getPlayIndexByCookie();
+
                 this.playByMode(undefined, function () {
                     if (!config.autoPlay) {
                         utils.trigger(this.dom.btn.play, 'click');

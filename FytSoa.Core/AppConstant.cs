@@ -19,6 +19,12 @@ namespace FytSoa.Core
 
         public const string SONG_HUB_AddSong = "AddSong";
 
+        public const string SONG_HUB_DeleteSong = "DeleteSong";
+
+        public const string SONG_HUB_PlaySong = "PlaySong";
+
+        public const string SONG_HUB_UpdateSongSortId = "UpdateSongSortId";
+
         public const string SONG_HUB_HeartBeat = "HeartBeat";
     }
 }

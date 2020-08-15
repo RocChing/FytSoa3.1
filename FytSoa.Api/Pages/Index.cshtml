@@ -7,20 +7,19 @@
     <script src="~/js/smusic.js?v=1"></script>
     <script src="~/js/index.js"></script>
 }
-<div>
-    <article class="wrapper">
-        <div class="tip">
-            <div class="hg">
-                <span>经典歌曲分享</span><span>&nbsp;&nbsp;</span>[<span id="list_title"></span>][<span id="list_number">0</span>]
-            </div>
-            <div class="hg dg">
-                自助点歌 <strong>歌曲名#歌手</strong>
-            </div>
+
+<article class="wrapper">
+    <div class="tip">
+        <div class="hg">
+            <span>经典歌曲分享</span><span>&nbsp;&nbsp;</span>[<span id="list_title"></span>][<span id="list_number">0</span>]
         </div>
-        <div id="music"></div>
-        @*<div class="button-group">
-                <button id="getCurrentMusic">获取当前播放歌曲</button>
-                <button id="addMusicToList">向列表中添加音乐</button>
-            </div>*@
-    </article>
+        <div class="hg dg">
+            自助点歌 <strong>歌曲名#歌手</strong>
+        </div>
+    </div>
+    <div id="music"></div>
+</article>
+
+<div class="ad">
+    <marquee id="ad" align="left" behavior="scroll" direction="left" loop="-1" onmouseout="this.start()" onmouseover="this.stop()"></marquee>
 </div>

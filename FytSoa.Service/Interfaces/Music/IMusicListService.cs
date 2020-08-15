@@ -11,5 +11,7 @@ namespace FytSoa.Service.Interfaces.Music
     public interface IMusicListService : IBaseService<MusicListInfo>
     {
         Task<bool> Insert(MusicListInfo info);
+
+        Task<bool> UpdateSortId(int id, int sortId);
     }
 }

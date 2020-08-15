@@ -28,7 +28,7 @@ namespace FytSoa.Api
                 model = list.FirstOrDefault();
             }
             string connectionId = Context.ConnectionId;
-            await Clients.Client(connectionId).SendAsync(FytSoa.Core.AppConstant.SONG_HUB_OnConnected, model);
+            await Clients.Client(connectionId).SendAsync(Core.AppConstant.SONG_HUB_OnConnected, model);
         }
     }
 }

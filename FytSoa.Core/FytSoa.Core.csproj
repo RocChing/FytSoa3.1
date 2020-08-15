@@ -4,6 +4,10 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>bin\Debug\netcoreapp3.1\FytSoa.Core.xml</DocumentationFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Remove="FytSoa.Service\Class1.cs" />
     <Compile Remove="FytSoa.Service\obj\Debug\netcoreapp3.1\FytSoa.Service.AssemblyInfo.cs" />

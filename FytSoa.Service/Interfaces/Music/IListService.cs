@@ -12,6 +12,10 @@ namespace FytSoa.Service.Interfaces.Music
     {
         Task<int> Insert(string name);
 
-        Task<bool> UpdateNumber(int id);
+        Task<bool> AddNumber(int id);
+
+        Task<bool> SubNumber(string name);
+
+        Task<bool> UpdateName(string name);
     }
 }

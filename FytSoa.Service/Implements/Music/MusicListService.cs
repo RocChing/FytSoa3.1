@@ -30,9 +30,21 @@ namespace FytSoa.Service.Implements.Music
             bool flag = await this.AddAsync(info);
             if (flag)
             {
-                await listService.UpdateNumber(info.ListId);
+                await listService.AddNumber(info.ListId);
             }
             return flag;
+        }
+
+        public async Task<bool> UpdateSortId(int id, int sortId)
+        {
+            var model = await this.GetModelAsync(m => m.Id == id);
+            if (model != null && model.Id > 0)
+            {
+                model.SortId = sortId;
+                int count = await UpdateAsync(model);
+                return count > 0;
+            }
+            return false;
         }
     }
 }

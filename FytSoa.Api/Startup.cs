@@ -46,16 +46,18 @@ namespace FytSoa.Api
             //              .WithOrigins(new string[] { "http://127.0.0.1" });
             //       //.SetIsOriginAllowed(_ => true); //指定特定域名才能访问
             //   }));
-
+            
             services.AddSignalR();
             services.AddRazorPages();
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "FytSoa API", Version = "v1" });
-                //var basePath = PlatformServices.Default.Application.ApplicationBasePath;
-                //var xmlPath = Path.Combine(basePath, "FytSoa.Api.xml");
-                //c.IncludeXmlComments(xmlPath);
+                var basePath = PlatformServices.Default.Application.ApplicationBasePath;
+                var apiXmlPath = Path.Combine(basePath, "FytSoa.Api.xml");
+                var coreXmlPath = Path.Combine(basePath, "FytSoa.Core.xml");
+                c.IncludeXmlComments(apiXmlPath);
+                c.IncludeXmlComments(coreXmlPath);
             });
 
             services.AddHostedService<SongHubBackgroudService>();
