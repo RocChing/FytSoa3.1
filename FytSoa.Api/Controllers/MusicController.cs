@@ -27,6 +27,20 @@ namespace FytSoa.Api.Controllers
             this.hub = hub;
         }
 
+        [HttpGet("test")]
+        public ApiResult<bool> Test()
+        {
+            bool flag = musicService.Test();
+            return ApiResult<bool>.Success(true);
+        }
+
+        /// <summary>
+        /// 播放音乐
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="isMusicId"></param>
+        /// <returns></returns>
+        [HttpGet("playMusic")]
         public async Task<ApiResult<string>> PlayMusic(string name, bool isMusicId = false)
         {
             string id = string.Empty;
@@ -185,6 +199,11 @@ namespace FytSoa.Api.Controllers
             return ApiResult<List<IMusic>>.Success(list);
         }
 
+        /// <summary>
+        /// 获得音乐列表
+        /// </summary>
+        /// <param name="name">关键字</param>
+        /// <returns></returns>
         [HttpGet("getMusics")]
         public async Task<ApiResult<List<MusicListViewModel>>> GetMusics(string name = "")
         {

@@ -13,6 +13,7 @@ using Newtonsoft.Json.Linq;
 using FytSoa.Core;
 using SqlSugar;
 using FytSoa.Core.ViewModel.Music;
+using HtmlAgilityPack;
 
 namespace FytSoa.Service.Implements.Music
 {
@@ -25,6 +26,47 @@ namespace FytSoa.Service.Implements.Music
         {
             this.listService = listService;
             this.musicListService = musicListService;
+        }
+
+        public bool Test()
+        {
+            try
+            {
+                string url = "http://baidu.9ku.com/song/?key=%E6%88%91";
+                var bytes = HttpWebClient.Get(url);
+                string json = Encoding.UTF8.GetString(bytes);
+
+                Logger.Default.Info("the html value is :" + json);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Logger.Default.Error(e.Message, e);
+                return false;
+            }
+        }
+
+        public bool Test2()
+        {
+            try
+            {
+                string url = "http://www.9ku.com/html/playjs/601/600306.js";
+                var bytes = HttpWebClient.Get(url);
+                string json = Encoding.UTF8.GetString(bytes);
+                if (!string.IsNullOrEmpty(json))
+                {
+                    json = json.Substring(1, json.Length - 2);
+                }
+
+                var obj = JsonConvert.DeserializeObject(json);
+                Logger.Default.Info("the html value is :" + JsonConvert.SerializeObject(obj));
+                return true;
+            }
+            catch (Exception e)
+            {
+                Logger.Default.Error(e.Message, e);
+                return false;
+            }
         }
 
         public async Task<List<MusicListViewModel>> UpdateSortId(int id, int sortId)
@@ -137,6 +179,9 @@ namespace FytSoa.Service.Implements.Music
             {
                 top = 10;
             }
+
+            return GetJiuKuMusics(kw, top);
+
             List<IMusic> list = new List<IMusic>();
             try
             {
@@ -177,6 +222,55 @@ namespace FytSoa.Service.Implements.Music
                 Logger.Default.Error(e.Message, e);
                 return list;
             }
+        }
+
+        public List<IMusic> GetJiuKuMusics(string kw, int top = 10)
+        {
+            List<IMusic> list = new List<IMusic>();
+            try
+            {
+                string url = $"http://baidu.9ku.com/song/?key={kw}";
+                var bytes = HttpWebClient.Get(url);
+                string html = Encoding.UTF8.GetString(bytes);
+                HtmlDocument document = new HtmlDocument();
+                document.LoadHtml(html);
+                var root = document.DocumentNode;
+                var lis = root.SelectNodes("//div[@class='songList']/ul/li");
+                if (lis != null && lis.Count > 0)
+                {
+                    foreach (var li in lis)
+                    {
+                        JiuKuMusic info = new JiuKuMusic();
+                        var song = li.SelectSingleNode("a[@class='songName']");
+                        if (song != null)
+                        {
+                            info.Name = song.InnerText;
+                            string href = song.Attributes["href"].Value;
+                            if (!string.IsNullOrEmpty(href))
+                            {
+                                string str = href.Substring(href.LastIndexOf("/") + 1);
+                                info.Id = str.Substring(0, str.IndexOf("."));
+                            }
+                        }
+                        var singer = li.SelectSingleNode("a[@class='singerName']");
+                        if (singer != null)
+                        {
+                            info.Artists = singer.InnerText;
+                        }
+                        var album = li.SelectSingleNode("a[@class='albumName']");
+                        if (album != null)
+                        {
+                            info.Album = album.InnerText;
+                        }
+                        list.Add(info);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Default.Error(e.Message, e);
+            }
+            return list;
         }
 
         public async Task<List<IMusic>> GetMusicsWithDb(SearchInput input)
@@ -394,6 +488,21 @@ namespace FytSoa.Service.Implements.Music
                         return res.GetFirstUrl();
                     }
                     return "";
+                }
+                else if (origin == MusicOrigin.JiuKu)
+                {
+                    decimal mid = decimal.Parse(music.Id);
+                    int id = (int)Math.Floor(mid / 1000) + 1;
+                    string url = $"http://www.9ku.com/html/playjs/{id}/{music.Id}.js";
+                    var bytes = HttpWebClient.Get(url);
+                    string json = Encoding.UTF8.GetString(bytes);
+                    if (!string.IsNullOrEmpty(json))
+                    {
+                        json = json.Substring(1, json.Length - 2);
+                    }
+
+                    var obj = JsonConvert.DeserializeObject(json);
+                    Logger.Default.Info("the html value is :" + JsonConvert.SerializeObject(obj));
                 }
                 else
                 {

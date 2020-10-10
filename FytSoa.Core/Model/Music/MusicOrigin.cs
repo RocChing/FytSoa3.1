@@ -9,6 +9,7 @@ namespace FytSoa.Core.Model.Music
         Netease,
         Kugou,
         Tencent,
-        Local
+        Local,
+        JiuKu
     }
 }
