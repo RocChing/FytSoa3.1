@@ -28,7 +28,5 @@ namespace FytSoa.Service.Interfaces.Music
         Task<bool> DeleteMusic(string musicId);
 
         Task<List<MusicListViewModel>> UpdateSortId(int id, int sortId);
-
-        bool Test();
     }
 }

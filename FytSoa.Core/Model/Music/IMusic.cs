@@ -17,22 +17,22 @@ namespace FytSoa.Core.Model.Music
         //string CoverId { get; set; }
 
         /// <summary>
-        /// 用于正确产生接口产生的艺术家数组名称
+        /// 歌手列表
         /// </summary>
         string Artists { get; set; }
 
         /// <summary>
-        /// 音乐名称
+        /// 歌曲名称
         /// </summary>
         string Name { get; set; }
 
         /// <summary>
-        /// 音乐专辑
+        /// 音乐专辑名称
         /// </summary>
         string Album { get; set; }
 
         /// <summary>
-        /// 音乐来源
+        /// 音乐来源名称
         /// </summary>
         string SourceName { get; }
 
@@ -41,10 +41,24 @@ namespace FytSoa.Core.Model.Music
         /// </summary>
         MusicOrigin Origin { get; }
 
+        /// <summary>
+        /// 专辑名称
+        /// </summary>
         string ConverUrl { get; set; }
 
+        /// <summary>
+        /// 歌词信息
+        /// </summary>
         LrcInfo LrcInfo { get; set; }
 
+        /// <summary>
+        /// 歌曲地址
+        /// </summary>
         string MusicUrl { get; set; }
+
+        /// <summary>
+        /// 歌手信息
+        /// </summary>
+        ArtistInfo ArtistInfo { get; set; }
     }
 }

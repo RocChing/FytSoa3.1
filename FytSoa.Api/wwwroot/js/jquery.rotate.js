@@ -18,8 +18,8 @@ var IE = eval('"v"=="\v"');
 jQuery.fn.extend({
     rotate:function(parameters)
     {
-        if (this.length===0||typeof parameters=="undefined") return;
-            if (typeof parameters=="number") parameters={angle:parameters};
+        if (this.length===0||typeof parameters==="undefined") return;
+            if (typeof parameters==="number") parameters={angle:parameters};
         var returned=[];
         for (var i=0,i0=this.length;i<i0;i++)
             {
@@ -115,7 +115,7 @@ Wilq32.PhotoEffect.prototype={
 	},
 	_handleRotation : function(parameters){
           this._setupParameters(parameters);
-          if (this._angle==this._parameters.animateTo) {
+          if (this._angle===this._parameters.animateTo) {
               this._rotate(this._angle);
           }
           else { 

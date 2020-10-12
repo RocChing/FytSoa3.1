@@ -24,6 +24,8 @@ namespace FytSoa.Core.Model.Music
 
         public string MusicUrl { get; set; }
 
+        public ArtistInfo ArtistInfo { get; set; }
+
         public KugouMusic() { }
     }
 }

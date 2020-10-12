@@ -25,5 +25,7 @@ namespace FytSoa.Core.Model.Music
         public string MusicUrl { get; set; }
 
         public string PicId { get; set; }
+
+        public ArtistInfo ArtistInfo { get; set; }
     }
 }

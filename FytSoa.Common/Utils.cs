@@ -7,6 +7,22 @@ namespace FytSoa.Common
 {
     public class Utils
     {
+        ///<summary>
+        ///恢复html中的特殊字符
+        ///</summary>
+        ///<paramname="theString">需要恢复的文本。</param>
+        ///<returns>恢复好的文本。</returns>
+        public static string HtmlDecode(string theString)
+        {
+            theString = theString.Replace("&gt;", ">");
+            theString = theString.Replace("&lt;", "<");
+            theString = theString.Replace("&nbsp;", " ");
+            theString = theString.Replace("&quot;", "\"");
+            theString = theString.Replace("&#39;", "\'");
+            theString = theString.Replace("<br/>", "\n");
+            return theString;
+        }
+
         /// <summary>
         /// 字符串转数组
         /// </summary>

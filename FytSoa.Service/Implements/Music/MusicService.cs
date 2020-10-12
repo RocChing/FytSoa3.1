@@ -14,6 +14,7 @@ using FytSoa.Core;
 using SqlSugar;
 using FytSoa.Core.ViewModel.Music;
 using HtmlAgilityPack;
+using System.Text.RegularExpressions;
 
 namespace FytSoa.Service.Implements.Music
 {
@@ -26,47 +27,6 @@ namespace FytSoa.Service.Implements.Music
         {
             this.listService = listService;
             this.musicListService = musicListService;
-        }
-
-        public bool Test()
-        {
-            try
-            {
-                string url = "http://www.9ku.com/play/1003659.htm";
-                var bytes = HttpWebClient.Get(url);
-                string json = Encoding.UTF8.GetString(bytes);
-
-                Logger.Default.Info("the html value is :" + json);
-                return true;
-            }
-            catch (Exception e)
-            {
-                Logger.Default.Error(e.Message, e);
-                return false;
-            }
-        }
-
-        public bool Test2()
-        {
-            try
-            {
-                string url = "http://www.9ku.com/html/playjs/601/600306.js";
-                var bytes = HttpWebClient.Get(url);
-                string json = Encoding.UTF8.GetString(bytes);
-                if (!string.IsNullOrEmpty(json))
-                {
-                    json = json.Substring(1, json.Length - 2);
-                }
-
-                var obj = JsonConvert.DeserializeObject(json);
-                Logger.Default.Info("the html value is :" + JsonConvert.SerializeObject(obj));
-                return true;
-            }
-            catch (Exception e)
-            {
-                Logger.Default.Error(e.Message, e);
-                return false;
-            }
         }
 
         public async Task<List<MusicListViewModel>> UpdateSortId(int id, int sortId)
@@ -260,7 +220,7 @@ namespace FytSoa.Service.Implements.Music
                         var album = li.SelectSingleNode("a[@class='albumName']");
                         if (album != null)
                         {
-                            info.Album = album.InnerText;
+                            info.Album = album.InnerText.Trim();
                         }
                         list.Add(info);
                     }
@@ -384,6 +344,15 @@ namespace FytSoa.Service.Implements.Music
                             findMusic = false;
                         }
                     }
+
+                    if (music.ArtistInfo == null || !music.ArtistInfo.HasData())
+                    {
+                        music.ArtistInfo = GetArtistInfo(music);
+                    }
+                    if (string.IsNullOrEmpty(music.ConverUrl))
+                    {
+                        music.ConverUrl = music.ArtistInfo.GetFirstBgImgUrl();
+                    }
                 }
 
                 if (findMusic)
@@ -404,6 +373,53 @@ namespace FytSoa.Service.Implements.Music
                 }
             }
             return null;
+        }
+
+        private ArtistInfo GetArtistInfo(IMusic music)
+        {
+            ArtistInfo info = new ArtistInfo();
+            try
+            {
+                string artists = music.Artists;
+                string[] strs = artists.Split(',', '|', ' ', '、');
+                string url = $"https://cn.bing.com/images/async?q={strs[0]}&first=0&count=10&scenario=ImageBasicHover&datsrc=I&layout=RowBased&mmasync=1&qft=+filterui:imagesize-custom_1200_700+filterui:photo-photo+filterui:aspect-wide";
+                var bytes = HttpWebClient.Get(url);
+                string html = Encoding.UTF8.GetString(bytes);
+                Regex reg = new Regex("m=\"(.*?)\"", RegexOptions.IgnoreCase);
+                var matches = reg.Matches(html);
+                if (matches != null && matches.Count > 0)
+                {
+                    foreach (Match item in matches)
+                    {
+                        string json = item.Groups[1].Value;
+                        if (string.IsNullOrEmpty(json))
+                        {
+                            continue;
+                        }
+                        string bgUrl = string.Empty;
+                        try
+                        {
+                            json = Utils.HtmlDecode(json);
+                            var obj = JObject.Parse(json);
+                            obj.TryGetValue("murl", out JToken t);
+                            if (t != null)
+                            {
+                                bgUrl = t.ToString();
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Logger.Default.Error(e.Message, e);
+                        }
+                        info.AddBgImgURL(bgUrl);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Default.Error(e.Message, e);
+            }
+            return info;
         }
 
         private string GetCoverUrl(IMusic music)

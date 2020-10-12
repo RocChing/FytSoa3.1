@@ -27,13 +27,6 @@ namespace FytSoa.Api.Controllers
             this.hub = hub;
         }
 
-        [HttpGet("test")]
-        public ApiResult<bool> Test()
-        {
-            bool flag = musicService.Test();
-            return ApiResult<bool>.Success(true);
-        }
-
         /// <summary>
         /// 播放音乐
         /// </summary>
