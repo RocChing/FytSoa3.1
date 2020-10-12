@@ -10,6 +10,7 @@ $(function () {
         connection = new signalR.HubConnectionBuilder().withUrl("/songHub").build();
 
         connection.on("OnConnected", function (model) {
+            console.log(model);
             if (model) {
                 var songList = getMusicList(model.musicList);
                 updateUI(model.listName, model.number);

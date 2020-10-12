@@ -40,6 +40,9 @@ namespace FytSoa.Core.Model.Music
                     case MusicOrigin.Kugou:
                         music = JsonConvert.DeserializeObject<KugouMusic>(json);
                         break;
+                    case MusicOrigin.JiuKu:
+                        music = JsonConvert.DeserializeObject<JiuKuMusic>(json);
+                        break;
                 }
             }
             catch (Exception e)

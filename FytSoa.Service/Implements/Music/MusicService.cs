@@ -32,7 +32,7 @@ namespace FytSoa.Service.Implements.Music
         {
             try
             {
-                string url = "http://baidu.9ku.com/song/?key=%E6%88%91";
+                string url = "http://www.9ku.com/play/1003659.htm";
                 var bytes = HttpWebClient.Get(url);
                 string json = Encoding.UTF8.GetString(bytes);
 
@@ -255,7 +255,7 @@ namespace FytSoa.Service.Implements.Music
                         var singer = li.SelectSingleNode("a[@class='singerName']");
                         if (singer != null)
                         {
-                            info.Artists = singer.InnerText;
+                            info.Artists = singer.InnerText.Trim();
                         }
                         var album = li.SelectSingleNode("a[@class='albumName']");
                         if (album != null)
@@ -357,10 +357,10 @@ namespace FytSoa.Service.Implements.Music
                         addMusic = true;
                         music.ConverUrl = GetCoverUrl(music);
                         Logger.Default.Debug("ConverUrl url:" + music.ConverUrl);
-                        if (string.IsNullOrEmpty(music.ConverUrl))
-                        {
-                            findMusic = false;
-                        }
+                        //if (string.IsNullOrEmpty(music.ConverUrl))
+                        //{
+                        //    findMusic = true;
+                        //}
                     }
 
                     if (string.IsNullOrEmpty(music.MusicUrl))
@@ -417,6 +417,10 @@ namespace FytSoa.Service.Implements.Music
                     string pwd = Utils.EncryptNeteaseId(pic_id);
                     return $"https://p1.music.126.net/{pwd}/{pic_id}.jpg";//?param=300y300
                 }
+                else if (origin == MusicOrigin.JiuKu)
+                {
+                    return null;
+                }
                 string url = $"{AppConstant.KUGOU_API_URL}?r=play/getdata&hash={music.Id}";
                 CookieCollection cookies = new CookieCollection();
                 cookies.Add(new Cookie("kg_mid", "emmmm"));
@@ -449,6 +453,21 @@ namespace FytSoa.Service.Implements.Music
                         {
                             return LrcInfo.Parse(res.Lrc.Lyric);
                         }
+                    }
+                    return null;
+                }
+                else if (origin == MusicOrigin.JiuKu)
+                {
+                    string url = $"http://www.9ku.com/play/{music.Id}.htm";
+                    var bytes = HttpWebClient.Get(url);
+                    string html = Encoding.UTF8.GetString(bytes);
+                    HtmlDocument document = new HtmlDocument();
+                    document.LoadHtml(html);
+                    var root = document.DocumentNode;
+                    var textarea = root.SelectSingleNode("//div[@id='lrctext']/textarea");
+                    if (textarea != null)
+                    {
+                        return LrcInfo.Parse(textarea.InnerText);
                     }
                     return null;
                 }
@@ -501,8 +520,9 @@ namespace FytSoa.Service.Implements.Music
                         json = json.Substring(1, json.Length - 2);
                     }
 
-                    var obj = JsonConvert.DeserializeObject(json);
-                    Logger.Default.Info("the html value is :" + JsonConvert.SerializeObject(obj));
+                    var obj = JObject.Parse(json);
+                    Logger.Default.Info("the json value is :" + json);
+                    return obj["wma"].ToString();
                 }
                 else
                 {
