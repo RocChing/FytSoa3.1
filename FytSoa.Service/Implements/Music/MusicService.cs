@@ -288,7 +288,6 @@ namespace FytSoa.Service.Implements.Music
             var list = await GetMusicsWithDb(input);
             if (list != null && list.Count > 0)
             {
-                bool addMusic = false;
                 bool findMusic = true;
                 IMusic music = null;
 
@@ -314,18 +313,12 @@ namespace FytSoa.Service.Implements.Music
                     Logger.Default.Debug(JsonConvert.SerializeObject(music));
                     if (string.IsNullOrEmpty(music.ConverUrl))
                     {
-                        addMusic = true;
                         music.ConverUrl = GetCoverUrl(music);
                         Logger.Default.Debug("ConverUrl url:" + music.ConverUrl);
-                        //if (string.IsNullOrEmpty(music.ConverUrl))
-                        //{
-                        //    findMusic = true;
-                        //}
                     }
 
                     if (string.IsNullOrEmpty(music.MusicUrl))
                     {
-                        addMusic = true;
                         music.MusicUrl = GetMusicUrl(music);
                         Logger.Default.Debug("MusicUrl url:" + music.MusicUrl);
                         if (string.IsNullOrEmpty(music.MusicUrl))
@@ -336,7 +329,6 @@ namespace FytSoa.Service.Implements.Music
 
                     if (music.LrcInfo == null)
                     {
-                        addMusic = true;
                         music.LrcInfo = GetLyricInfo(music);
                         Logger.Default.Debug("LrcInfo json:" + JsonConvert.SerializeObject(music.LrcInfo));
                         if (music.LrcInfo == null)
@@ -349,6 +341,7 @@ namespace FytSoa.Service.Implements.Music
                     {
                         music.ArtistInfo = GetArtistInfo(music);
                     }
+
                     if (string.IsNullOrEmpty(music.ConverUrl))
                     {
                         music.ConverUrl = music.ArtistInfo.GetFirstBgImgUrl();
@@ -357,13 +350,12 @@ namespace FytSoa.Service.Implements.Music
 
                 if (findMusic)
                 {
-                    if (addMusic)
-                    {
-                        var musicInfo = new MusicInfo(music);
-                        await AddMusicInfo(musicInfo);
-                    }
+                    var musicInfo = new MusicInfo(music);
+                    await SaveMusicInfo(musicInfo);
+
                     string listName = GetCurrentListName();
                     int listId = await listService.Insert(listName);
+
                     bool flag4 = await musicListService.Insert(new MusicListInfo(listId, music.Id, input.SortId));
                     return flag4 ? music : null;
                 }
@@ -559,11 +551,12 @@ namespace FytSoa.Service.Implements.Music
             }
         }
 
-        private async Task AddMusicInfo(MusicInfo info)
+        private async Task SaveMusicInfo(MusicInfo info)
         {
             var model = await this.GetModelAsync(m => m.MusicId == info.MusicId);
             if (model != null && model.Id > 0)
             {
+                await UpdateAsync(info);
                 return;
             }
             await this.AddAsync(info);
