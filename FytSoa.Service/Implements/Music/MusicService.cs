@@ -15,6 +15,7 @@ using SqlSugar;
 using FytSoa.Core.ViewModel.Music;
 using HtmlAgilityPack;
 using System.Text.RegularExpressions;
+using MySql.Data.Common;
 
 namespace FytSoa.Service.Implements.Music
 {
@@ -52,25 +53,24 @@ namespace FytSoa.Service.Implements.Music
         public async Task<List<MusicViewModel>> GetMusicList(GetSearchInput input)
         {
             string listName = input.ListName;
-            if (!string.IsNullOrEmpty(listName))
+            if (string.IsNullOrEmpty(listName))
             {
                 listName = GetCurrentListName();
             }
-            return await Db.Queryable<MusicListInfo, ListInfo, MusicInfo>((ml, l, m) => new JoinQueryInfos(JoinType.Left, ml.ListId == l.Id, JoinType.Left, ml.MusicId == m.MusicId))
-                  .WhereIF(!string.IsNullOrEmpty(listName), (ml, l, m) => m.Name == listName)
+            var list = await Db.Queryable<MusicListInfo, ListInfo, MusicInfo>((ml, l, m) => new JoinQueryInfos(JoinType.Left, ml.ListId == l.Id, JoinType.Left, ml.MusicId == m.MusicId))
+                  .WhereIF(!string.IsNullOrEmpty(listName), (ml, l, m) => l.Name == listName)
                   .WhereIF(!string.IsNullOrEmpty(input.Name), (ml, l, m) => m.Name.Contains(input.Name))
                   .WhereIF(!string.IsNullOrEmpty(input.Author), (ml, l, m) => m.Artists.Contains(input.Author))
                   .OrderBy((ml, l, m) => ml.SortId, OrderByType.Desc)
                   .OrderBy((ml, l, m) => ml.Id)
-                  .Select((ml, l, m) => new MusicViewModel()
-                  {
-                      Id = ml.Id,
-                      Artists = m.Artists,
-                      Name = m.Name,
-                      SortId = ml.SortId,
-                      MusicId = m.MusicId
-                  })
+                  .Select((ml, l, m) => new { ml, l, m })
                   .ToListAsync();
+            var resLIst = new List<MusicViewModel>();
+            foreach (var item in list)
+            {
+                resLIst.Add(new MusicViewModel(item.m, item.ml.SortId));
+            }
+            return resLIst;
         }
 
         public async Task<bool> DeleteMusic(string musicId)
@@ -237,9 +237,35 @@ namespace FytSoa.Service.Implements.Music
         {
             string name = input.Name;
             string author = input.Author;
+            string key = name;
 
+            List<MusicInfo> dbList = null;
             List<IMusic> list = new List<IMusic>();
-            var dbList = await this.GetListAsync(m => m.Name == name && m.Artists.Contains(author), m => m.Id, DbOrderEnum.Desc);
+
+            bool flag = true;
+            if (string.IsNullOrEmpty(name))
+            {
+                key = author;
+                flag = false;
+            }
+
+            if (string.IsNullOrEmpty(author))
+            {
+                flag = false;
+            }
+
+            if (flag)
+            {
+                dbList = await this.GetListAsync(m => m.Name == name && m.Artists.Contains(author), m => m.Id, DbOrderEnum.Desc);
+            }
+            else
+            {
+                dbList = await Db.Queryable<MusicInfo>()
+                   .WhereIF(!string.IsNullOrEmpty(key), m => m.Name == key || m.Artists.Contains(key))
+                   .OrderBy(m => m.Id, OrderByType.Desc)
+                   .ToListAsync();
+            }
+
             if (dbList != null && dbList.Count > 0)
             {
                 foreach (var item in dbList)
@@ -299,7 +325,22 @@ namespace FytSoa.Service.Implements.Music
 
                 if (music == null)
                 {
-                    music = list.FirstOrDefault(m => m.Name == input.Name && m.Artists.Contains(input.Author));
+                    music = list.FirstOrDefault(m =>
+                    {
+                        bool flag = true;
+                        string name = input.Name;
+                        string author = input.Author;
+                        string key = name;
+                        if (!string.IsNullOrEmpty(name))
+                        {
+                            flag = flag && m.Name == name;
+                        }
+                        if (!string.IsNullOrEmpty(author))
+                        {
+                            flag = flag && m.Artists.Contains(author);
+                        }
+                        return flag;
+                    });
                 }
 
                 if (music == null)

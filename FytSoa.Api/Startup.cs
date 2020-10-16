@@ -37,16 +37,17 @@ namespace FytSoa.Api
             services.RegisterAssembly("FytSoa.Service");
             services.AddTransient(typeof(IBaseService<>), typeof(BaseService<>));
 
-            //services.AddCors(options => options.AddPolicy("SignalR",
-            //   builder =>
-            //   {
-            //       builder.AllowAnyMethod() //允许任意请求方式
-            //              .AllowAnyHeader() //允许任意header
-            //              .AllowCredentials()//允许验证
-            //              .WithOrigins(new string[] { "http://127.0.0.1" });
-            //       //.SetIsOriginAllowed(_ => true); //指定特定域名才能访问
-            //   }));
-            
+            string allowedCors = Configuration.GetValue<string>("AllowedCors");
+            services.AddCors(options => options.AddPolicy("MyCorsPolicy",
+               builder =>
+               {
+                   builder.AllowAnyMethod() //允许任意请求方式
+                          .AllowAnyHeader() //允许任意header
+                          .AllowCredentials()//允许验证http://127.0.0.1
+                          .WithOrigins(allowedCors.Split(','));
+                   //.SetIsOriginAllowed(_ => true); //指定特定域名才能访问
+               }));
+
             services.AddSignalR();
             services.AddRazorPages();
             services.AddControllers();
@@ -73,7 +74,7 @@ namespace FytSoa.Api
             //加载配置文件
             NLog.LogManager.LoadConfiguration("nlog.config").GetCurrentClassLogger();
             app.UseStaticFiles();
-            //app.UseCors("SignalR");
+            app.UseCors("MyCorsPolicy");
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {

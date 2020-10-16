@@ -9,6 +9,7 @@ using FytSoa.Common;
 using FytSoa.Core.ViewModel.Music;
 using Microsoft.AspNetCore.SignalR;
 using System.Timers;
+using Microsoft.AspNetCore.Cors;
 
 namespace FytSoa.Api.Controllers
 {
@@ -79,7 +80,7 @@ namespace FytSoa.Api.Controllers
         /// <param name="input"></param>
         /// <returns></returns>
         [HttpGet("add")]
-        public async Task<ApiResult<string>> AddMusicBySearch([FromQuery] SearchInput input)
+        public async Task<ApiResult<MusicViewModel>> AddMusicBySearch([FromQuery] SearchInput input)
         {
             string fansName = input.FansName;
             if (string.IsNullOrEmpty(fansName))
@@ -87,9 +88,15 @@ namespace FytSoa.Api.Controllers
                 fansName = "管理员";
             }
             var model = await musicService.AddMusicBySearch(input);
-            await SendAddMusicMsg(model, fansName);
-            string msg = model != null ? "歌曲添加成功" : "没有找到合适的歌曲";
-            return ApiResult<string>.Success(msg);
+            if (model != null)
+            {
+                await SendAddMusicMsg(model, fansName);
+                return ApiResult<MusicViewModel>.Success(new MusicViewModel(model, 100), "歌曲添加成功");
+            }
+            else
+            {
+                return ApiResult<MusicViewModel>.Fail("没有找到合适的歌曲");
+            }
         }
 
         /// <summary>

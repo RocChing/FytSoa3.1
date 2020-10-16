@@ -8,7 +8,6 @@ namespace FytSoa.Core.Model.Music
 {
     public class SearchInput
     {
-       
         /// <summary>
         /// 歌曲名称
         /// </summary>
@@ -18,7 +17,6 @@ namespace FytSoa.Core.Model.Music
         /// <summary>
         /// 歌手
         /// </summary>
-        [Required]
         public string Author { get; set; }
 
         /// <summary>
